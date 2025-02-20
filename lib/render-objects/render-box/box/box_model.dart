@@ -1,0 +1,249 @@
+import 'package:flutter/material.dart';
+
+
+enum BoxSizing {
+
+  BORDER_BOX,
+
+  CONTENT_BOX,
+
+}
+
+class BoxModel {
+
+  BoxModel({
+    this.boxSizing = BoxSizing.BORDER_BOX,
+    this.width,
+    this.height,
+    this.contentWidth,
+    this.contentHeight,
+    this.margin = const EdgeInsets.all(0),
+    this.borderBox = BorderEdgeInsets.none,
+    this.paddingBox = const EdgeInsets.all(0),
+  }) {
+    final width = this.width;
+    final height = this.height;
+    final contentWidth = this.contentWidth;
+    final contentHeight = this.contentHeight;
+
+    if (width == null && contentWidth == null) {
+      throw Exception('Both width and contentWidth cannot be null');
+    }
+
+    if (height == null && contentHeight == null) {
+      throw Exception('Both height and contentHeight cannot be null');
+    }
+
+    if (this.boxSizing == BoxSizing.CONTENT_BOX) {
+      this.contentBox = Size(
+        width ?? contentWidth!,
+        height ?? contentHeight!,
+      );
+
+      this.borderBoxSize = Size(
+        this.contentBox.width + this.paddingBox.horizontal + this.borderBox.horizontal,
+        this.contentBox.height + this.paddingBox.vertical + this.borderBox.vertical,
+      );
+    }
+    else {
+      this.borderBoxSize = Size(
+        width ?? (contentWidth! + this.paddingBox.horizontal + this.borderBox.horizontal),
+        height ?? (contentHeight! + this.paddingBox.vertical + this.borderBox.vertical),
+      );
+
+      this.contentBox = Size(
+        this.borderBoxSize.width - this.borderBox.horizontal - this.paddingBox.horizontal,
+        this.borderBoxSize.height - this.borderBox.vertical - this.paddingBox.vertical,
+      );
+    }
+
+    this.horizontalSpace = this.borderBoxSize.width + this.margin.horizontal;
+    this.verticalSpace = this.borderBoxSize.height + this.margin.vertical;
+
+    this.borderBoxOffset = Offset(
+      this.margin.left,
+      this.margin.top,
+    );
+
+    this.paddingBoxOffset = Offset(
+      this.borderBoxOffset.dx + this.borderBox.left,
+      this.borderBoxOffset.dy + this.borderBox.top,
+    );
+
+    this.contentBoxOffset = Offset(
+      this.paddingBoxOffset.dx + this.paddingBox.left,
+      this.paddingBoxOffset.dy + this.paddingBox.top,
+    );
+
+    this.paddingBoxSize = Size(
+      this.contentBox.width + this.paddingBox.horizontal,
+      this.contentBox.height + this.paddingBox.vertical,
+    );
+  }
+
+  final BoxSizing boxSizing;
+
+  late final double horizontalSpace;
+
+  late final double verticalSpace;
+
+  late final Offset borderBoxOffset;
+
+  late final Offset paddingBoxOffset;
+
+  late final Offset contentBoxOffset;
+
+  late final Size borderBoxSize;
+
+  late final Size paddingBoxSize;
+
+  /// Null means auto sized
+  final double? width;
+
+  /// Null means auto sized
+  final double? height;
+
+  /// if [width] is non null this must be null
+  /// if [width] is null this must be non null
+  final double? contentWidth;
+
+  /// if [height] is non null this must be null
+  /// if [height] is null this must be non null
+  final double? contentHeight;
+
+  final EdgeInsets margin;
+
+  final BorderEdgeInsets borderBox;
+
+  final EdgeInsets paddingBox;
+
+  late final Size contentBox;
+
+}
+
+
+
+class BorderEdgeInsets {
+
+  const BorderEdgeInsets.only({
+    this.topSide = BorderSide.none,
+    this.rightSide = BorderSide.none,
+    this.bottomSide = BorderSide.none,
+    this.leftSide = BorderSide.none,
+  });
+
+  final BorderSide topSide;
+
+  final BorderSide rightSide;
+
+  final BorderSide bottomSide;
+
+  final BorderSide leftSide;
+
+  double get top {
+    return this.topSide.width;
+  }
+
+  double get right {
+    return this.rightSide.width;
+  }
+
+  double get bottom {
+    return this.bottomSide.width;
+  }
+
+  double get left {
+    return this.leftSide.width;
+  }
+
+  double get horizontal {
+    return this.left.toDouble() + this.right.toDouble();
+  }
+
+  double get vertical {
+    return this.top.toDouble() + this.bottom.toDouble();
+  }
+
+  static const none = BorderEdgeInsets.only(
+    topSide: BorderSide.none,
+    rightSide: BorderSide.none,
+    bottomSide: BorderSide.none,
+    leftSide: BorderSide.none,
+  );
+
+  const BorderEdgeInsets.all(BorderSide side)
+    : this.only(
+      topSide: side,
+      rightSide: side,
+      bottomSide: side,
+      leftSide: side,
+    );
+
+  const BorderEdgeInsets.fromLTRB(BorderSide left, BorderSide top, BorderSide right, BorderSide bottom)
+    : this.only(
+      topSide: top,
+      rightSide: right,
+      bottomSide: bottom,
+      leftSide: left,
+    );
+
+  const BorderEdgeInsets.horizontal(BorderSide side)
+    : this.only(
+      topSide: side,
+      rightSide: side,
+      bottomSide: side,
+      leftSide: side,
+    );
+
+  const BorderEdgeInsets.vertical(BorderSide side)
+    : this.only(
+      topSide: side,
+      rightSide: side,
+      bottomSide: side,
+      leftSide: side,
+    );
+
+  const BorderEdgeInsets.symmetric({
+    required BorderSide horizontal,
+    required BorderSide vertical,
+  }) : this.only(
+      topSide: vertical,
+      rightSide: horizontal,
+      bottomSide: vertical,
+      leftSide: horizontal,
+    );
+
+}
+
+enum BorderUnitStyle {
+
+  NONE,
+
+  SOLID,
+
+  DASHED,
+
+  DOTTED,
+
+}
+
+class BorderSide {
+
+  const BorderSide({
+    this.style = BorderUnitStyle.SOLID,
+    required this.width,
+    this.color = Colors.transparent,
+  });
+
+  static const none = BorderSide(
+    width: 0,
+    style: BorderUnitStyle.NONE,
+  );
+
+  final double width;
+
+  final Color color;
+
+  final BorderUnitStyle style;
+
+}

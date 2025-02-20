@@ -1,0 +1,10 @@
+{
+    "editor.formatOnSave": false,
+    "editor.formatOnPaste": false,
+    "editor.formatOnType": false,
+    "dart.flutterSdkPath": "~/flutter",
+    "dart.lineLength": 0,
+    "editor.rulers": [],
+    "IDX.aI.enableInlineCompletion": true,
+    "IDX.aI.enableCodebaseIndexing": true
+}
