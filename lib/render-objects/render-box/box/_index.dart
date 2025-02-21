@@ -472,41 +472,46 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
         parentUsesSize: true,
       );
 
-      switch (itemAlignment) {
+      if (
+        FlexDirection.isVertical(this.style.flexDirection) && (this.style.width != Unit.auto || this.boxParentData?.horizontalFlexSize != null)
+        || !FlexDirection.isVertical(this.style.flexDirection) && (this.style.height != Unit.auto || this.boxParentData?.verticalFlexSize != null)
+      ) {
+        switch (itemAlignment) {
 
-        case ItemAlignment.FLEX_START:
-          if (FlexDirection.isVertical(this.style.flexDirection)) {
-            childParentData.offset = Offset(0, totalDy);
-          }
-          else {
-            childParentData.offset = Offset(totalDx, 0);
-          }
-        break;
+          case ItemAlignment.FLEX_START:
+            if (FlexDirection.isVertical(this.style.flexDirection)) {
+              childParentData.offset = Offset(0, totalDy);
+            }
+            else {
+              childParentData.offset = Offset(totalDx, 0);
+            }
+          break;
 
-        case ItemAlignment.FLEX_END:
-          if (FlexDirection.isVertical(this.style.flexDirection)) {
-            childParentData.offset = Offset(boxModel.contentBox.width - child.size.width, totalDy);
-          }
-          else {
-            childParentData.offset = Offset(totalDx, boxModel.contentBox.height - child.size.height);
-          }
-        break;
+          case ItemAlignment.FLEX_END:
+            if (FlexDirection.isVertical(this.style.flexDirection)) {
+              childParentData.offset = Offset(boxModel.contentBox.width - child.size.width, totalDy);
+            }
+            else {
+              childParentData.offset = Offset(totalDx, boxModel.contentBox.height - child.size.height);
+            }
+          break;
 
-        case ItemAlignment.CENTER:
-          if ((this.style.width != Unit.auto || this.boxParentData?.horizontalFlexSize != null) && FlexDirection.isVertical(this.style.flexDirection)) {
-            childParentData.offset = Offset(boxModel.contentBox.width / 2 - child.size.width / 2, totalDy);
-          }
-          else
-          if ((this.style.height != Unit.auto || this.boxParentData?.verticalFlexSize != null) && FlexDirection.isVertical(this.style.flexDirection)) {
-            childParentData.offset = Offset(totalDx, boxModel.contentBox.height / 2 - child.size.height / 2);
-          }
-        break;
+          case ItemAlignment.CENTER:
+            if (FlexDirection.isVertical(this.style.flexDirection)) {
+              childParentData.offset = Offset(boxModel.contentBox.width / 2 - child.size.width / 2, totalDy);
+            }
+            else {
+              childParentData.offset = Offset(totalDx, boxModel.contentBox.height / 2 - child.size.height / 2);
+            }
+          break;
 
-        case ItemAlignment.STRETCH:
-          
-        break;
+          case ItemAlignment.STRETCH:
+            
+          break;
 
+        }
       }
+
 
       maxChildWidth = Math.max(maxChildWidth, child.size.width);
       maxChildHeight = Math.max(maxChildHeight, child.size.height);

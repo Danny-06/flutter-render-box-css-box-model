@@ -145,7 +145,7 @@ class MyAppState extends State<MyApp> {
                     children: [
                       Box(
                         style: Style(
-                          // alignSelf: ItemAlignment.STRETCH,
+                          alignSelf: ItemAlignment.STRETCH,
                           // width: 50.px,
                           height: 50.px,
                           backgroundColor: Colors.red,
