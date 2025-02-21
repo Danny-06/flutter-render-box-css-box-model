@@ -1,11 +1,11 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' hide BorderSide;
-import 'package:flutter/rendering.dart';
+import 'package:flutter/rendering.dart' hide BorderSide;
 import 'dart:math' as Math;
+import 'dart:ui' as ui;
 
 import '/render-objects/render-box/box/style.dart';
 import '/render-objects/render-box/box/box_model.dart';
-
 
 
 class Box extends MultiChildRenderObjectWidget {
@@ -33,6 +33,12 @@ class Box extends MultiChildRenderObjectWidget {
 class BoxParentData extends ContainerBoxParentData<RenderBox> {
 
   BoxParentData();
+
+  Axis direction = Axis.vertical;
+
+  double? verticalFlexSize;
+
+  double? horizontalFlexSize;
 
 }
 
@@ -107,25 +113,33 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     );
   }
 
-  late BoxModel boxModel;
+  BoxModel? boxModel;
 
-  var parentBoxModel = null as BoxModel?;
-
-  get parentConstrainedWidth {
+  BoxModel? get parentBoxModel {
     final parent = this.parent;
 
     if (parent is StyledRenderBox) {
-      return parent.boxModel.contentBox.width;
+      return parent.boxModel;
+    }
+
+    return null;
+  }
+
+  get parentConstrainedWidth {
+    final parentBoxModel = this.parentBoxModel;
+
+    if (parentBoxModel != null) {
+      return parentBoxModel.contentBox.width;
     }
 
     return super.constraints.maxWidth;
   }
 
   get parentConstrainedHeight {
-    final parent = this.parent;
+    final parentBoxModel = this.parentBoxModel;
 
-    if (parent is StyledRenderBox) {
-      return parent.boxModel.contentBox.height;
+    if (parentBoxModel != null) {
+      return parentBoxModel.contentBox.height;
     }
 
     return super.constraints.maxHeight;
@@ -133,49 +147,84 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
   @override
   void performLayout() {
-    final style = this.style;
+    final computedMinWidth = this.resolveMinWidth(this.style.minWidth);
 
-    if (this.parent is StyledRenderBox) {
-      this.parentBoxModel = (this.parent as StyledRenderBox).boxModel;
-    }
+    final computedMaxWidth = this.resolveMaxWidth(this.style.maxWidth);
 
-    final computedMinWidth = this.resolveMinWidth(style.minWidth);
+    final computedWidth = this.resolveWidth(this.style.width)?.clamp(computedMinWidth, computedMaxWidth);
 
-    final computedMaxWidth = this.resolveMaxWidth(style.maxWidth);
+    final computedMinHeight = this.resolveMinHeight(this.style.minHeight);
 
-    final computedWidth = this.resolveWidth(style.width)?.clamp(computedMinWidth, computedMaxWidth);
+    final computedMaxHeight = this.resolveMaxHeight(this.style.maxHeight);
 
-    final computedMinHeight = this.resolveMinHeight(style.minHeight);
-
-    final computedMaxHeight = this.resolveMaxHeight(style.maxHeight);
-
-    final computedHeight = this.resolveHeight(style.height)?.clamp(computedMinHeight, computedMaxHeight);
+    final computedHeight = this.resolveHeight(this.style.height)?.clamp(computedMinHeight, computedMaxHeight);
 
     final isParentAutoSizedByContent = computedWidth == null || computedHeight == null;
 
     if (!isParentAutoSizedByContent) {
-      this.boxModel = BoxModel(
-        boxSizing: style.boxSizing,
+      final boxModel = BoxModel(
+        boxSizing: this.style.boxSizing,
         width: computedWidth,
         height: computedHeight,
         margin: EdgeInsets.only(
-          top: this.resolveUnit(style.margin?.top) ?? 0,
-          right: this.resolveUnit(style.margin?.right) ?? 0,
-          bottom: this.resolveUnit(style.margin?.bottom) ?? 0,
-          left: this.resolveUnit(style.margin?.left) ?? 0,
+          top: this.resolveUnit(this.style.margin?.top, direction: Axis.vertical) ?? 0,
+          right: this.resolveUnit(this.style.margin?.right, direction: Axis.horizontal) ?? 0,
+          bottom: this.resolveUnit(this.style.margin?.bottom, direction: Axis.vertical) ?? 0,
+          left: this.resolveUnit(this.style.margin?.left, direction: Axis.horizontal) ?? 0,
         ),
+        borderBox: this.borderEdgeInsetsUnitToBorderEdgeInsets(this.style.border),
         paddingBox: EdgeInsets.only(
-          top: this.resolveUnit(style.padding?.top) ?? 0,
-          right: this.resolveUnit(style.padding?.right) ?? 0,
-          bottom: this.resolveUnit(style.padding?.bottom) ?? 0,
-          left: this.resolveUnit(style.padding?.left) ?? 0,
+          top: this.resolveUnit(this.style.padding?.top, direction: Axis.vertical) ?? 0,
+          right: this.resolveUnit(this.style.padding?.right, direction: Axis.horizontal) ?? 0,
+          bottom: this.resolveUnit(this.style.padding?.bottom, direction: Axis.vertical) ?? 0,
+          left: this.resolveUnit(this.style.padding?.left, direction: Axis.horizontal) ?? 0,
         ),
       );
 
       this.size = Size(
-        this.boxModel.horizontalSpace,
-        this.boxModel.verticalSpace,
+        boxModel.horizontalSpace,
+        boxModel.verticalSpace,
       );
+
+      this.boxModel = boxModel;
+    }
+    else {
+      final boxParentData = (this.parentData is BoxParentData) ? this.parentData as BoxParentData : null;
+
+      final direction = boxParentData?.direction;
+      final horizontalFlexSize = boxParentData?.horizontalFlexSize;
+      final verticalFlexSize = boxParentData?.verticalFlexSize;
+
+      final boxModel = BoxModel(
+        direction: direction,
+        horizontalFlexSize: horizontalFlexSize,
+        verticalFlexSize: verticalFlexSize,
+        boxSizing: this.style.boxSizing,
+        width: computedWidth,
+        height: computedHeight,
+        contentWidth: 0,
+        contentHeight: 0,
+        margin: EdgeInsets.only(
+          top: this.resolveUnit(this.style.margin?.top, direction: Axis.vertical) ?? 0,
+          right: this.resolveUnit(this.style.margin?.right, direction: Axis.horizontal) ?? 0,
+          bottom: this.resolveUnit(this.style.margin?.bottom, direction: Axis.vertical) ?? 0,
+          left: this.resolveUnit(this.style.margin?.left, direction: Axis.horizontal) ?? 0,
+        ),
+        borderBox: this.borderEdgeInsetsUnitToBorderEdgeInsets(this.style.border),
+        paddingBox: EdgeInsets.only(
+          top: this.resolveUnit(this.style.padding?.top, direction: Axis.vertical) ?? 0,
+          right: this.resolveUnit(this.style.padding?.right, direction: Axis.horizontal) ?? 0,
+          bottom: this.resolveUnit(this.style.padding?.bottom, direction: Axis.vertical) ?? 0,
+          left: this.resolveUnit(this.style.padding?.left, direction: Axis.horizontal) ?? 0,
+        ),
+      );
+
+      this.size = Size(
+        boxModel.horizontalSpace,
+        boxModel.verticalSpace,
+      );
+
+      this.boxModel = boxModel;
     }
 
     final (contentWidth, contentHeight) = (
@@ -183,30 +232,42 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     );
 
     if (isParentAutoSizedByContent) {
-      this.boxModel = BoxModel(
-        boxSizing: style.boxSizing,
+      final boxParentData = (this.parentData is BoxParentData) ? this.parentData as BoxParentData : null;
+
+      final direction = boxParentData?.direction;
+      final horizontalFlexSize = boxParentData?.horizontalFlexSize;
+      final verticalFlexSize = boxParentData?.verticalFlexSize;
+
+      final boxModel = BoxModel(
+        direction: direction,
+        horizontalFlexSize: horizontalFlexSize,
+        verticalFlexSize: verticalFlexSize,
+        boxSizing: this.style.boxSizing,
         width: computedWidth,
         height: computedHeight,
         contentWidth: contentWidth,
         contentHeight: contentHeight,
         margin: EdgeInsets.only(
-          top: this.resolveUnit(style.margin?.top) ?? 0,
-          right: this.resolveUnit(style.margin?.right) ?? 0,
-          bottom: this.resolveUnit(style.margin?.bottom) ?? 0,
-          left: this.resolveUnit(style.margin?.left) ?? 0,
+          top: this.resolveUnit(this.style.margin?.top, direction: Axis.vertical) ?? 0,
+          right: this.resolveUnit(this.style.margin?.right, direction: Axis.horizontal) ?? 0,
+          bottom: this.resolveUnit(this.style.margin?.bottom, direction: Axis.vertical) ?? 0,
+          left: this.resolveUnit(this.style.margin?.left, direction: Axis.horizontal) ?? 0,
         ),
+        borderBox: this.borderEdgeInsetsUnitToBorderEdgeInsets(this.style.border),
         paddingBox: EdgeInsets.only(
-          top: this.resolveUnit(style.padding?.top) ?? 0,
-          right: this.resolveUnit(style.padding?.right) ?? 0,
-          bottom: this.resolveUnit(style.padding?.bottom) ?? 0,
-          left: this.resolveUnit(style.padding?.left) ?? 0,
+          top: this.resolveUnit(this.style.padding?.top, direction: Axis.vertical) ?? 0,
+          right: this.resolveUnit(this.style.padding?.right, direction: Axis.horizontal) ?? 0,
+          bottom: this.resolveUnit(this.style.padding?.bottom, direction: Axis.vertical) ?? 0,
+          left: this.resolveUnit(this.style.padding?.left, direction: Axis.horizontal) ?? 0,
         ),
       );
 
       this.size = Size(
-        this.boxModel.horizontalSpace,
-        this.boxModel.verticalSpace,
+        boxModel.horizontalSpace,
+        boxModel.verticalSpace,
       );
+
+      this.boxModel = boxModel;
     }
   }
 
@@ -216,16 +277,24 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
   void paint(PaintingContext context, Offset offset) {
     this.offset = offset;
 
+    if (this.style.opacity == 0) {
+      return;
+    }
+
+    final boxModel = this.boxModel!;
+
     // Obtain the canvas from the context and create a blue paint object
     final Canvas canvas = context.canvas;
     final Paint paint = Paint();
 
-    paint.color = this.style.backgroundColor ?? Colors.transparent;
+    paint.color = (
+      this.style.backgroundColor ?? Colors.transparent
+    );
 
-    final boxOffset = offset + this.boxModel.paddingBoxOffset;
+    final boxOffset = offset + boxModel.paddingBoxOffset;
 
     // Define the rectangle to be drawn (based on size and offset)
-    final rect = boxOffset & this.boxModel.paddingBoxSize;
+    final rect = boxOffset & boxModel.paddingBoxSize;
 
     final rRect = RRect.fromRectAndCorners(
       rect,
@@ -241,14 +310,25 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
       canvas.clipRRect(rRect);
     }
 
-    this.defaultPaint(context, offset + this.boxModel.contentBoxOffset);
+    this.defaultPaint(context, offset + boxModel.contentBoxOffset);
+  }
+  @override
+  bool get isRepaintBoundary => this.style.opacity != 1 && this.style.opacity != 0;
+
+  @override
+  OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
+    final OpacityLayer layer = oldLayer ?? OpacityLayer();
+    layer.alpha = ui.Color.getAlphaFromOpacity(this.style.opacity);
+    return layer;
   }
 
   @override
   bool hitTestSelf(Offset position) {
-    final boxOffset = this.offset + this.boxModel.borderBoxOffset;
+    final boxModel = this.boxModel!;
 
-    final rect = boxOffset & this.boxModel.borderBoxSize;
+    final boxOffset = this.offset + boxModel.borderBoxOffset;
+
+    final rect = boxOffset & boxModel.borderBoxSize;
 
     return rect.contains(position);
   }
@@ -346,8 +426,14 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
             )
     );
 
+    final boxModel = this.boxModel!;
+
     for (final (child, _) in childrenIterable) {
       final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
+
+      if (childParentData is BoxParentData) {
+        childParentData.direction = FlexDirection.getAxisFrom(this.style.flexDirection);
+      }
 
       final itemAlignment = () {
         if (child is StyledRenderBox && child.style.alignSelf != null) {
@@ -357,6 +443,19 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
           return this.style.alignItems;
         }
       }();
+
+      if (itemAlignment == ItemAlignment.STRETCH) {
+        if (FlexDirection.isVertical(this.style.flexDirection)) {
+          if (childParentData is BoxParentData) {
+            childParentData.horizontalFlexSize = boxModel.contentBox.width;
+          }
+        }
+        else {
+          if (childParentData is BoxParentData) {
+            childParentData.verticalFlexSize = boxModel.contentBox.height;
+          }
+        }
+      }
 
       child.layout(
         childConstraints,
@@ -376,24 +475,24 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
         case ItemAlignment.FLEX_END:
           if (FlexDirection.isVertical(this.style.flexDirection)) {
-            childParentData.offset = Offset(this.boxModel.contentBox.width - child.size.width, totalDy);
+            childParentData.offset = Offset(boxModel.contentBox.width - child.size.width, totalDy);
           }
           else {
-            childParentData.offset = Offset(totalDx, this.boxModel.contentBox.height - child.size.height);
+            childParentData.offset = Offset(totalDx, boxModel.contentBox.height - child.size.height);
           }
         break;
 
         case ItemAlignment.CENTER:
           if (FlexDirection.isVertical(this.style.flexDirection)) {
-            childParentData.offset = Offset(this.boxModel.contentBox.width / 2 - child.size.width / 2, totalDy);
+            childParentData.offset = Offset(boxModel.contentBox.width / 2 - child.size.width / 2, totalDy);
           }
           else {
-            childParentData.offset = Offset(totalDx, this.boxModel.contentBox.height / 2 - child.size.height / 2);
+            childParentData.offset = Offset(totalDx, boxModel.contentBox.height / 2 - child.size.height / 2);
           }
         break;
 
         case ItemAlignment.STRETCH:
-
+          
         break;
 
       }
@@ -417,14 +516,27 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     // TESTING Justity Content
 
     if (this.style.justifyContent == ContentAlignment.CENTER) {
-      final totalHeight = this.boxModel.contentBox.height;
+      if (FlexDirection.isVertical(this.style.flexDirection)) {
+        final totalHeight = boxModel.contentBox.height;
 
-      final translationValue = (totalHeight - contentHeight) / 2;
+        final translationValue = (totalHeight - contentHeight) / 2;
 
-      for (final (child, _) in childrenIterable) {
-        final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
+        for (final (child, _) in childrenIterable) {
+          final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
 
-        childParentData.offset = childParentData.offset.translate(0, translationValue);
+          childParentData.offset = childParentData.offset.translate(0, translationValue);
+        }
+      }
+      else {
+        final totalWidth = boxModel.contentBox.width;
+
+        final translationValue = (totalWidth - contentWidth) / 2;
+
+        for (final (child, _) in childrenIterable) {
+          final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
+
+          childParentData.offset = childParentData.offset.translate(translationValue, 0);
+        }
       }
     }
 
@@ -498,6 +610,35 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     final computedValue = this.resolveUnit(unit, direction: Axis.vertical);
 
     return computedValue;
+  }
+
+  BorderEdgeInsets borderEdgeInsetsUnitToBorderEdgeInsets(BorderEdgeInsetsUnit? borderEdgeInsetsUnit) {
+    if (borderEdgeInsetsUnit == null) {
+      return BorderEdgeInsets.none;
+    }
+
+    return BorderEdgeInsets.only(
+      topSide: BorderSide(
+        width: this.resolveUnit(borderEdgeInsetsUnit.top, direction: Axis.vertical)!,
+        color: borderEdgeInsetsUnit.topSide.color,
+        style: borderEdgeInsetsUnit.topSide.style,
+      ),
+      rightSide: BorderSide(
+        width: this.resolveUnit(borderEdgeInsetsUnit.right, direction: Axis.horizontal)!,
+        color: borderEdgeInsetsUnit.rightSide.color,
+        style: borderEdgeInsetsUnit.rightSide.style,
+      ),
+      bottomSide: BorderSide(
+        width: this.resolveUnit(borderEdgeInsetsUnit.bottom, direction: Axis.vertical)!,
+        color: borderEdgeInsetsUnit.bottomSide.color,
+        style: borderEdgeInsetsUnit.bottomSide.style,
+      ),
+      leftSide: BorderSide(
+        width: this.resolveUnit(borderEdgeInsetsUnit.left, direction: Axis.horizontal)!,
+        color: borderEdgeInsetsUnit.leftSide.color,
+        style: borderEdgeInsetsUnit.leftSide.style,
+      ),
+    );
   }
 
 }

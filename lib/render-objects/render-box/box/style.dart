@@ -16,6 +16,9 @@ class Style {
     this.maxHeight,
     this.backgroundColor,
     this.color,
+    this.overflow = Overflow.VISIBLE,
+    this.opacity = 1,
+
     this.alignSelf,
     this.flexGrow = 0,
     this.flexShrink = 0,
@@ -26,7 +29,6 @@ class Style {
     this.flexWrap = FlexWrap.NOWRAP,
     this.rowGap = Unit.zero,
     this.columnGap = Unit.zero,
-    this.overflow = Overflow.VISIBLE,
   });
 
   final BoxSizing boxSizing;
@@ -54,6 +56,8 @@ class Style {
   final Color? color;
 
   final Overflow overflow;
+
+  final double opacity;
 
   // FlexBox
 
@@ -113,6 +117,14 @@ enum FlexDirection {
       FlexDirection.VERTICAL,
       FlexDirection.VERTICAL_REVERSE,
     ].contains(direction);
+  }
+
+  static getAxisFrom(FlexDirection direction) {
+    if (FlexDirection.isVertical(direction)) {
+      return Axis.vertical;
+    }
+
+    return Axis.horizontal;
   }
 
 }

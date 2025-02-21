@@ -20,17 +20,20 @@ class BoxModel {
     this.margin = const EdgeInsets.all(0),
     this.borderBox = BorderEdgeInsets.none,
     this.paddingBox = const EdgeInsets.all(0),
+    this.direction,
+    this.horizontalFlexSize,
+    this.verticalFlexSize,
   }) {
     final width = this.width;
     final height = this.height;
     final contentWidth = this.contentWidth;
     final contentHeight = this.contentHeight;
 
-    if (width == null && contentWidth == null) {
+    if (width == null && contentWidth == null && this.horizontalFlexSize == null) {
       throw Exception('Both width and contentWidth cannot be null');
     }
 
-    if (height == null && contentHeight == null) {
+    if (height == null && contentHeight == null && this.verticalFlexSize == null) {
       throw Exception('Both height and contentHeight cannot be null');
     }
 
@@ -54,6 +57,18 @@ class BoxModel {
       this.contentBox = Size(
         this.borderBoxSize.width - this.borderBox.horizontal - this.paddingBox.horizontal,
         this.borderBoxSize.height - this.borderBox.vertical - this.paddingBox.vertical,
+      );
+    }
+
+    if (this.direction == Axis.vertical && this.horizontalFlexSize != null && this.width == null) {
+      this.borderBoxSize = Size(
+        this.horizontalFlexSize! - this.margin.horizontal,
+        this.borderBoxSize.height,
+      );
+
+      this.contentBox = Size(
+        this.borderBoxSize.width - this.paddingBox.horizontal,
+        this.contentBox.height,
       );
     }
 
@@ -93,9 +108,15 @@ class BoxModel {
 
   late final Offset contentBoxOffset;
 
-  late final Size borderBoxSize;
+  late Size borderBoxSize;
 
   late final Size paddingBoxSize;
+
+  final Axis? direction;
+
+  final double? horizontalFlexSize;
+
+  final double? verticalFlexSize;
 
   /// Null means auto sized
   final double? width;
@@ -117,7 +138,7 @@ class BoxModel {
 
   final EdgeInsets paddingBox;
 
-  late final Size contentBox;
+  late Size contentBox;
 
 }
 

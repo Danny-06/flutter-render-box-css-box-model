@@ -145,10 +145,42 @@ class MyAppState extends State<MyApp> {
                     children: [
                       Box(
                         style: Style(
-                          width: 50.px,
+                          alignSelf: ItemAlignment.STRETCH,
+                          // width: 50.px,
                           height: 50.px,
                           backgroundColor: Colors.red,
+                          margin: EdgeInsetsUnit.only(
+                            // top: 30.px,
+                            // left: 20.px,
+                            // right: 40.px,
+                          ),
+                          padding: EdgeInsetsUnit.only(
+                            top: 5.px,
+                            left: 5.px,
+                            right: 5.px,
+                            bottom: 5.px,
+                          ),
                         ),
+                        children: [
+                          Box(
+                            style: Style(
+                              alignSelf: ItemAlignment.CENTER,
+                              width: 30.px,
+                              height: 30.px,
+                              backgroundColor: Colors.white,
+                            ),
+                            children: [
+                              Box(
+                                style: Style(
+                                  // alignSelf: ItemAlignment.CENTER,
+                                  width: 10.px,
+                                  height: 10.px,
+                                  backgroundColor: Colors.black,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                       Box(
                         style: Style(
@@ -167,6 +199,8 @@ class MyAppState extends State<MyApp> {
                           width: 70.px,
                           height: 70.px,
                           backgroundColor: Colors.white,
+                          flexDirection: FlexDirection.HORIZONTAL,
+                          justifyContent: ContentAlignment.CENTER,
                         ),
                         children: [
                           Box(
