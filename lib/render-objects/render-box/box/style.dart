@@ -81,6 +81,10 @@ class Style {
 
   final Unit columnGap;
 
+  Style merge() {
+    return Style();
+  }
+
 }
 
 

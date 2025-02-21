@@ -146,9 +146,20 @@ class MyAppState extends State<MyApp> {
                     children: [
                       Box(
                         style: Style(
+                          alignSelf: ItemAlignment.FLEX_END,
+                          width: Unit.auto,
+                          height: Unit.auto,
+                          backgroundColor: Colors.orange,
+                        ),
+                        children: [
+                          Text('Text', style: TextStyle(fontSize: 16),),
+                        ],
+                      ),
+                      Box(
+                        style: Style(
                           alignSelf: ItemAlignment.STRETCH,
                           // width: 50.px,
-                          height: 50.px,
+                          // height: 50.px,
                           backgroundColor: Colors.red,
                           margin: EdgeInsetsUnit.only(
                             // top: 30.px,
@@ -182,17 +193,6 @@ class MyAppState extends State<MyApp> {
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                      Box(
-                        style: Style(
-                          alignSelf: ItemAlignment.FLEX_END,
-                          width: Unit.auto,
-                          height: Unit.auto,
-                          backgroundColor: Colors.orange,
-                        ),
-                        children: [
-                          Text('Text', style: TextStyle(fontSize: 16),),
                         ],
                       ),
                       Box(

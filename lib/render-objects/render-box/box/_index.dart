@@ -472,10 +472,12 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
         parentUsesSize: true,
       );
 
-      if (
+      final hasSize = (
         FlexDirection.isVertical(this.style.flexDirection) && (this.style.width != Unit.auto || this.boxParentData?.horizontalFlexSize != null)
         || !FlexDirection.isVertical(this.style.flexDirection) && (this.style.height != Unit.auto || this.boxParentData?.verticalFlexSize != null)
-      ) {
+      );
+
+      if (hasSize) {
         switch (itemAlignment) {
 
           case ItemAlignment.FLEX_START:
@@ -514,6 +516,14 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
             }
           break;
 
+        }
+      }
+      else {
+        if (FlexDirection.isVertical(this.style.flexDirection)) {
+          childParentData.offset = Offset(0, totalDy);
+        }
+        else {
+          childParentData.offset = Offset(totalDx, 0);
         }
       }
 
