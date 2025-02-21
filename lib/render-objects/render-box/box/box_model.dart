@@ -71,6 +71,17 @@ class BoxModel {
         this.contentBox.height,
       );
     }
+    else if (this.direction == Axis.horizontal && this.verticalFlexSize != null && this.height == null) {
+      this.borderBoxSize = Size(
+        this.borderBoxSize.width,
+        this.verticalFlexSize! - this.margin.vertical,
+      );
+
+      this.contentBox = Size(
+        this.contentBox.width,
+        this.borderBoxSize.height - this.paddingBox.vertical,
+      );
+    }
 
     this.horizontalSpace = this.borderBoxSize.width + this.margin.horizontal;
     this.verticalSpace = this.borderBoxSize.height + this.margin.vertical;

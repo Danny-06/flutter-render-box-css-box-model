@@ -71,14 +71,16 @@ class MyAppState extends State<MyApp> {
                         top: (0).px,
                         left: (50).px,
                       ),
+                      flexDirection: FlexDirection.HORIZONTAL,
+                      alignItems: ItemAlignment.STRETCH,
                       justifyContent: ContentAlignment.CENTER,
                     ),
                     children: [
                       Box(
                         style: Style(
                           width: 20.px,
-                          height: 20.px,
-                          backgroundColor: Colors.red,
+                          // height: 20.px,
+                          backgroundColor: Colors.blue,
                         ),
                       ),
                     ],
@@ -159,7 +161,7 @@ class MyAppState extends State<MyApp> {
                         style: Style(
                           alignSelf: ItemAlignment.STRETCH,
                           // width: 50.px,
-                          // height: 50.px,
+                          height: 50.px,
                           backgroundColor: Colors.red,
                           margin: EdgeInsetsUnit.only(
                             // top: 30.px,
