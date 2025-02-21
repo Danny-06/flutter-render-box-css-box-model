@@ -113,6 +113,16 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     );
   }
 
+  BoxParentData? get boxParentData {
+    final parentData = this.parentData;
+
+    if (parentData is BoxParentData) {
+      return parentData;
+    }
+
+    return null;
+  }
+
   BoxModel? boxModel;
 
   BoxModel? get parentBoxModel {
@@ -483,10 +493,11 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
         break;
 
         case ItemAlignment.CENTER:
-          if (FlexDirection.isVertical(this.style.flexDirection)) {
+          if ((this.style.width != Unit.auto || this.boxParentData?.horizontalFlexSize != null) && FlexDirection.isVertical(this.style.flexDirection)) {
             childParentData.offset = Offset(boxModel.contentBox.width / 2 - child.size.width / 2, totalDy);
           }
-          else {
+          else
+          if ((this.style.height != Unit.auto || this.boxParentData?.verticalFlexSize != null) && FlexDirection.isVertical(this.style.flexDirection)) {
             childParentData.offset = Offset(totalDx, boxModel.contentBox.height / 2 - child.size.height / 2);
           }
         break;

@@ -145,7 +145,7 @@ class MyAppState extends State<MyApp> {
                     children: [
                       Box(
                         style: Style(
-                          alignSelf: ItemAlignment.STRETCH,
+                          // alignSelf: ItemAlignment.STRETCH,
                           // width: 50.px,
                           height: 50.px,
                           backgroundColor: Colors.red,
@@ -168,11 +168,12 @@ class MyAppState extends State<MyApp> {
                               width: 30.px,
                               height: 30.px,
                               backgroundColor: Colors.white,
+                              justifyContent: ContentAlignment.CENTER,
                             ),
                             children: [
                               Box(
                                 style: Style(
-                                  // alignSelf: ItemAlignment.CENTER,
+                                  alignSelf: ItemAlignment.CENTER,
                                   width: 10.px,
                                   height: 10.px,
                                   backgroundColor: Colors.black,
