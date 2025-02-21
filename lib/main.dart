@@ -85,7 +85,8 @@ class MyAppState extends State<MyApp> {
                   ),
                   Box(
                     style: Style(
-                      width: 20.px,
+                      alignSelf: ItemAlignment.STRETCH,
+                      // width: 20.px,
                       height: 20.px,
                       padding: EdgeInsetsUnit.only(
                         top: 20.px,

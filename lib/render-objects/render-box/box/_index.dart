@@ -506,12 +506,16 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
           break;
 
           case ItemAlignment.STRETCH:
-            
+            if (FlexDirection.isVertical(this.style.flexDirection)) {
+              childParentData.offset = Offset(0, totalDy);
+            }
+            else {
+              childParentData.offset = Offset(totalDx, 0);
+            }
           break;
 
         }
       }
-
 
       maxChildWidth = Math.max(maxChildWidth, child.size.width);
       maxChildHeight = Math.max(maxChildHeight, child.size.height);
