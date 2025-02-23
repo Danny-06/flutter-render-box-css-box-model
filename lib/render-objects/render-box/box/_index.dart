@@ -658,14 +658,18 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
       break;
 
       case ContentAlignment.SPACE_BETWEEN:
-        if (this.childCount == 0) {
+        if (this.childCount == 1) {
           break;
         }
 
         if (FlexDirection.isVertical(this.style.flexDirection)) {
+          if (this.style.height == Unit.auto) {
+            break;
+          }
+
           final translationValue = (boxModel.contentBox.height - (contentHeight - (rowGap * (this.childCount - 1)))) / (this.childCount - 1);
 
-          if (translationValue <= 1) {
+          if (translationValue <= 0) {
             break;
           }
 
@@ -680,9 +684,13 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
           }
         }
         else {
+          if (this.style.width == Unit.auto) {
+            break;
+          }
+
           final translationValue = (boxModel.contentBox.width - (contentWidth - (columnGap * (this.childCount - 1)))) / (this.childCount - 1);
 
-          if (translationValue <= 1) {
+          if (translationValue <= 0) {
             break;
           }
 
@@ -699,7 +707,72 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
       break;
 
       case ContentAlignment.SPACE_AROUND:
+        if (this.childCount == 1) {
+          break;
+        }
 
+        if (FlexDirection.isVertical(this.style.flexDirection)) {
+          if (this.style.height == Unit.auto) {
+            break;
+          }
+
+          final translationValue = (
+            (boxModel.contentBox.height - (contentHeight - (rowGap * (this.childCount - 1)))) / this.childCount
+          ) / 2;
+
+          if (translationValue <= 0) {
+            break;
+          }
+
+          var currentTranslationOffset = 0.0;
+
+          for (final (child, index) in childrenIterable) {
+            final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
+
+            currentTranslationOffset += translationValue;
+
+            if (index == 0) {
+              currentTranslationOffset -= rowGap * (this.childCount - 1) / 2;
+            }
+
+            if (index > 0) {
+              currentTranslationOffset += childParentData.previousSibling!.size.height + translationValue + rowGap;
+            }
+
+            childParentData.offset = Offset(childParentData.offset.dx, currentTranslationOffset);
+          }
+        }
+        else {
+          if (this.style.width == Unit.auto) {
+            break;
+          }
+
+          final translationValue = (
+            (boxModel.contentBox.width - (contentWidth - (columnGap * (this.childCount - 1)))) / this.childCount
+          ) / 2;
+
+          if (translationValue <= 0) {
+            break;
+          }
+
+          var currentTranslationOffset = 0.0;
+
+          for (final (child, index) in childrenIterable) {
+            final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
+
+            currentTranslationOffset += translationValue;
+
+            if (index == 0) {
+              currentTranslationOffset -= columnGap * (this.childCount - 1) / 2;
+            }
+
+            if (index > 0) {
+              currentTranslationOffset += childParentData.previousSibling!.size.width + translationValue + columnGap;
+            }
+
+            childParentData.offset = Offset(currentTranslationOffset, childParentData.offset.dy);
+          }
+        }
       break;
 
       case ContentAlignment.SPACE_EVENLY:

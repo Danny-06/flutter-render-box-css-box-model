@@ -79,9 +79,17 @@ class MyAppState extends State<MyApp> {
                       ),
                       flexDirection: FlexDirection.HORIZONTAL,
                       alignItems: ItemAlignment.STRETCH,
-                      justifyContent: ContentAlignment.SPACE_BETWEEN,
+                      justifyContent: ContentAlignment.SPACE_AROUND,
+                      // columnGap: 10.px,
                     ),
                     children: [
+                      Box(
+                        style: Style(
+                          width: 20.px,
+                          // height: 20.px,
+                          backgroundColor: Colors.blue,
+                        ),
+                      ),
                       Box(
                         style: Style(
                           width: 20.px,
@@ -147,7 +155,7 @@ class MyAppState extends State<MyApp> {
                     style: Style(
                       alignSelf: ItemAlignment.CENTER,
                       width: 220.px,
-                      height: 250.px,
+                      height: 300.px,
                       backgroundColor: Colors.blue,
                       margin: EdgeInsetsUnit.only(
                         // top: 30.px,
@@ -169,9 +177,9 @@ class MyAppState extends State<MyApp> {
                       ),
                       flexDirection: FlexDirection.VERTICAL,
                       // flexDirection: FlexDirection.VERTICAL_REVERSE,
-                      justifyContent: ContentAlignment.SPACE_BETWEEN,
+                      justifyContent: ContentAlignment.SPACE_AROUND,
                       columnGap: 10.px,
-                      rowGap: 10.px,
+                      // rowGap: 10.px,
                       overflow: Overflow.VISIBLE,
                     ),
                     children: [
