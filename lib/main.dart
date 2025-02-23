@@ -51,6 +51,7 @@ class MyAppState extends State<MyApp> {
               height: 1.pr,
               backgroundColor: Color.fromRGBO(50, 50, 50, 1),
               padding: EdgeInsetsUnit.all(10.px),
+              expandChild: true,
             ),
             children: [
               SingleChildScrollView(

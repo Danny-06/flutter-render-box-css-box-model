@@ -4,6 +4,7 @@ import '/render-objects/render-box/box/box_model.dart';
 class Style {
 
   const Style({
+    this.expandChild = false,
     this.boxSizing = BoxSizing.BORDER_BOX,
     this.margin,
     this.border,
@@ -30,6 +31,8 @@ class Style {
     this.rowGap = Unit.zero,
     this.columnGap = Unit.zero,
   });
+
+  final bool expandChild;
 
   final BoxSizing boxSizing;
 

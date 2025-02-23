@@ -409,7 +409,7 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     final boxModel = this.boxModel!;
 
     // To support scrollers
-    if (this.childCount == 1 && this.firstChild is RepaintBoundary) {
+    if (this.style.expandChild) {
       final child = this.firstChild!;
 
       child.layout(
