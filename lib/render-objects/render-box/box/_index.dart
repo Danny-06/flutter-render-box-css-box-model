@@ -105,13 +105,13 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     }
   }
 
-  @override
-  BoxConstraints get constraints {
-    return BoxConstraints(
-      maxWidth: super.constraints.maxWidth,
-      maxHeight: super.constraints.maxHeight,
-    );
-  }
+  // @override
+  // BoxConstraints get constraints {
+  //   return BoxConstraints(
+  //     maxWidth: super.constraints.maxWidth,
+  //     maxHeight: super.constraints.maxHeight,
+  //   );
+  // }
 
   BoxParentData? get boxParentData {
     final parentData = this.parentData;
@@ -135,24 +135,24 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     return null;
   }
 
-  get parentConstrainedWidth {
+  double get parentConstrainedWidth {
     final parentBoxModel = this.parentBoxModel;
 
     if (parentBoxModel != null) {
       return parentBoxModel.contentBox.width;
     }
 
-    return super.constraints.maxWidth;
+    return this.constraints.maxWidth;
   }
 
-  get parentConstrainedHeight {
+  double get parentConstrainedHeight {
     final parentBoxModel = this.parentBoxModel;
 
     if (parentBoxModel != null) {
       return parentBoxModel.contentBox.height;
     }
 
-    return super.constraints.maxHeight;
+    return this.constraints.maxHeight;
   }
 
   @override
@@ -255,8 +255,8 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
         boxSizing: this.style.boxSizing,
         width: computedWidth,
         height: computedHeight,
-        contentWidth: contentWidth,
-        contentHeight: contentHeight,
+        contentWidth: contentWidth.clamp(computedMinWidth, computedMaxWidth),
+        contentHeight: contentHeight.clamp(computedMinHeight, computedMaxHeight),
         margin: EdgeInsets.only(
           top: this.resolveUnit(this.style.margin?.top, direction: Axis.vertical) ?? 0,
           right: this.resolveUnit(this.style.margin?.right, direction: Axis.horizontal) ?? 0,
@@ -344,6 +344,11 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
   }
 
   @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    return this.defaultHitTestChildren(result, position: position);
+  }
+
+  @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
 
@@ -401,6 +406,28 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
   }
 
   (double contentWidth, double contentHeight) flexLayout(isParentAutoSizedByContent) {
+    final boxModel = this.boxModel!;
+
+    // To support scrollers
+    if (this.childCount == 1 && this.firstChild is RepaintBoundary) {
+      final child = this.firstChild!;
+
+      child.layout(
+        BoxConstraints(
+          maxWidth: boxModel.contentBox.width,
+          minWidth: boxModel.contentBox.width,
+          maxHeight: boxModel.contentBox.height,
+          minHeight: boxModel.contentBox.height,
+        ),
+      );
+
+      final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
+
+      childParentData.offset = Offset(0, 0);
+
+      return (0, 0);
+    }
+
     final childrenIterable = (
       FlexDirection.isReversed(this.style.flexDirection)
         ? this.childrenReverseIterator()
@@ -422,21 +449,14 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     final childConstraints = (
       isParentAutoSizedByContent
         ? BoxConstraints(
-          maxWidth: double.infinity,
-          maxHeight: double.infinity,
+          maxWidth: this.parentConstrainedWidth,
+          maxHeight: this.parentConstrainedHeight,
         )
-        : this.parentBoxModel != null
-            ? BoxConstraints(
-              maxWidth: this.parentBoxModel!.contentBox.width,
-              maxHeight: this.parentBoxModel!.contentBox.height,
-            )
-            : BoxConstraints(
-              maxWidth: this.size.width,
-              maxHeight: this.size.height,
-            )
+        : BoxConstraints(
+            maxWidth: boxModel.contentBox.width,
+            maxHeight: boxModel.contentBox.height,
+          )
     );
-
-    final boxModel = this.boxModel!;
 
     for (final (child, _) in childrenIterable) {
       final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
