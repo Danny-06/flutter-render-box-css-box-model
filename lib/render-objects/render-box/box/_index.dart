@@ -281,12 +281,8 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     }
   }
 
-  Offset offset = Offset(0, 0);
-
   @override
   void paint(PaintingContext context, Offset offset) {
-    this.offset = offset;
-
     if (this.style.opacity == 0) {
       return;
     }
@@ -341,7 +337,7 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
   bool hitTestSelf(Offset position) {
     final boxModel = this.boxModel!;
 
-    final boxOffset = this.offset + boxModel.borderBoxOffset;
+    final boxOffset = boxModel.borderBoxOffset;
 
     final rect = boxOffset & boxModel.borderBoxSize;
 
