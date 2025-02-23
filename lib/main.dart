@@ -164,6 +164,54 @@ class MyAppState extends State<MyApp> {
                     ),
                     Box(
                       style: Style(
+                        width: 80.px,
+                        height: 200.px,
+                        backgroundColor: Colors.purple,
+                        margin: EdgeInsetsUnit.only(
+                          top: (0).px,
+                          left: (50).px,
+                        ),
+                        padding: EdgeInsetsUnit.only(
+                          top: 5.px,
+                          left: 5.px,
+                          right: 5.px,
+                          bottom: 5.px,
+                        ),
+                        // rowGap: 5.px,
+                        flexDirection: FlexDirection.VERTICAL,
+                        alignItems: ItemAlignment.STRETCH,
+                        justifyContent: ContentAlignment.SPACE_EVENLY,
+                        // columnGap: 10.px,
+                      ),
+                      children: [
+                        Box(
+                          style: Style(
+                            height: 20.px,
+                            backgroundColor: Colors.blue,
+                          ),
+                        ),
+                        Box(
+                          style: Style(
+                            height: 20.px,
+                            backgroundColor: Colors.blue,
+                          ),
+                        ),
+                        Box(
+                          style: Style(
+                            height: 20.px,
+                            backgroundColor: Colors.blue,
+                          ),
+                        ),
+                        Box(
+                          style: Style(
+                            height: 20.px,
+                            backgroundColor: Colors.blue,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Box(
+                      style: Style(
                         alignSelf: ItemAlignment.STRETCH,
                         // width: 20.px,
                         height: 20.px,
