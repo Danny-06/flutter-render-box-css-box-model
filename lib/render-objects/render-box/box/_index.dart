@@ -531,11 +531,11 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
       maxChildHeight = Math.max(maxChildHeight, child.size.height);
 
       if (FlexDirection.isVertical(this.style.flexDirection)) {
-        contentHeight += child.size.height;
+        contentHeight += child.size.height + rowGap;
         totalDy += child.size.height + rowGap;
       }
       else {
-        contentWidth += child.size.width;
+        contentWidth += child.size.width + columnGap;
         totalDx += child.size.width + columnGap;
       }
     }
@@ -543,38 +543,169 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     totalDx -= columnGap;
     totalDy -= rowGap;
 
-    // TESTING Justity Content
-
-    if (this.style.justifyContent == ContentAlignment.CENTER) {
-      if (FlexDirection.isVertical(this.style.flexDirection)) {
-        final totalHeight = boxModel.contentBox.height;
-
-        final translationValue = (totalHeight - contentHeight) / 2;
-
-        for (final (child, _) in childrenIterable) {
-          final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
-
-          childParentData.offset = childParentData.offset.translate(0, translationValue);
-        }
-      }
-      else {
-        final totalWidth = boxModel.contentBox.width;
-
-        final translationValue = (totalWidth - contentWidth) / 2;
-
-        for (final (child, _) in childrenIterable) {
-          final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
-
-          childParentData.offset = childParentData.offset.translate(translationValue, 0);
-        }
-      }
+    if (FlexDirection.isVertical(this.style.flexDirection)) {
+      contentHeight -= rowGap;
     }
+    else {
+      contentWidth -= columnGap;
+    }
+    
 
     if (FlexDirection.isVertical(this.style.flexDirection)) {
       contentWidth = maxChildWidth;
     }
     else {
       contentHeight = maxChildHeight;
+    }
+
+    switch (this.style.justifyContent) {
+
+      case ContentAlignment.FLEX_START:
+
+        switch (this.style.flexDirection) {
+
+          case FlexDirection.VERTICAL:
+            // Nothing to do
+          break;
+
+          case FlexDirection.VERTICAL_REVERSE:
+            final translationValue = boxModel.contentBox.height - contentHeight;
+
+            for (final (child, _) in childrenIterable) {
+              final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
+
+              childParentData.offset = childParentData.offset.translate(0, translationValue);
+            }
+          break;
+
+          case FlexDirection.HORIZONTAL:
+            // Nothing to do
+          break;
+
+          case FlexDirection.HORIZONTAL_REVERSE:
+            final translationValue = boxModel.contentBox.width - contentWidth;
+
+            for (final (child, _) in childrenIterable) {
+              final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
+
+              childParentData.offset = childParentData.offset.translate(translationValue, 0);
+            }
+          break;
+
+        }
+
+      break;
+
+      case ContentAlignment.FLEX_END:
+
+        switch (this.style.flexDirection) {
+
+          case FlexDirection.VERTICAL:
+            final translationValue = boxModel.contentBox.height - contentHeight;
+
+            for (final (child, _) in childrenIterable) {
+              final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
+
+              childParentData.offset = childParentData.offset.translate(0, translationValue);
+            }
+          break;
+
+          case FlexDirection.VERTICAL_REVERSE:
+            // Nothing to do
+          break;
+
+          case FlexDirection.HORIZONTAL:
+            final translationValue = boxModel.contentBox.width - contentWidth;
+
+            for (final (child, _) in childrenIterable) {
+              final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
+
+              childParentData.offset = childParentData.offset.translate(translationValue, 0);
+            }
+          break;
+
+          case FlexDirection.HORIZONTAL_REVERSE:
+            // Nothing to do
+          break;
+
+        }
+
+      break;
+
+      case ContentAlignment.CENTER:
+        if (FlexDirection.isVertical(this.style.flexDirection)) {
+          final totalHeight = boxModel.contentBox.height;
+
+          final translationValue = (totalHeight - contentHeight) / 2;
+
+          for (final (child, _) in childrenIterable) {
+            final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
+
+            childParentData.offset = childParentData.offset.translate(0, translationValue);
+          }
+        }
+        else {
+          final totalWidth = boxModel.contentBox.width;
+
+          final translationValue = (totalWidth - contentWidth) / 2;
+
+          for (final (child, _) in childrenIterable) {
+            final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
+
+            childParentData.offset = childParentData.offset.translate(translationValue, 0);
+          }
+        }
+      break;
+
+      case ContentAlignment.SPACE_BETWEEN:
+        if (this.childCount == 0) {
+          break;
+        }
+
+        if (FlexDirection.isVertical(this.style.flexDirection)) {
+          final translationValue = (boxModel.contentBox.height - (contentHeight - (rowGap * (this.childCount - 1)))) / (this.childCount - 1);
+
+          if (translationValue <= 1) {
+            break;
+          }
+
+          var currentChildrenSizeOffset = 0.0;
+
+          for (final (child, index) in childrenIterable) {
+            final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
+
+            currentChildrenSizeOffset += childParentData.previousSibling?.size.height ?? 0.0;
+
+            childParentData.offset = Offset(childParentData.offset.dx, translationValue * index + currentChildrenSizeOffset);
+          }
+        }
+        else {
+          final translationValue = (boxModel.contentBox.width - (contentWidth - (columnGap * (this.childCount - 1)))) / (this.childCount - 1);
+
+          if (translationValue <= 1) {
+            break;
+          }
+
+          var currentChildrenSizeOffset = 0.0;
+
+          for (final (child, index) in childrenIterable) {
+            final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
+
+            currentChildrenSizeOffset += childParentData.previousSibling?.size.width ?? 0.0;
+
+            childParentData.offset = Offset(translationValue * index + currentChildrenSizeOffset, childParentData.offset.dy);
+          }
+        }
+      break;
+
+      case ContentAlignment.SPACE_AROUND:
+
+      break;
+
+      case ContentAlignment.SPACE_EVENLY:
+
+      break;
+
     }
 
     return (contentWidth, contentHeight);

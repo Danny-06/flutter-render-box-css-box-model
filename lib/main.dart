@@ -71,11 +71,31 @@ class MyAppState extends State<MyApp> {
                         top: (0).px,
                         left: (50).px,
                       ),
+                      padding: EdgeInsetsUnit.only(
+                        top: 5.px,
+                        left: 5.px,
+                        right: 5.px,
+                        bottom: 5.px,
+                      ),
                       flexDirection: FlexDirection.HORIZONTAL,
                       alignItems: ItemAlignment.STRETCH,
-                      justifyContent: ContentAlignment.CENTER,
+                      justifyContent: ContentAlignment.SPACE_BETWEEN,
                     ),
                     children: [
+                      Box(
+                        style: Style(
+                          width: 20.px,
+                          // height: 20.px,
+                          backgroundColor: Colors.blue,
+                        ),
+                      ),
+                      Box(
+                        style: Style(
+                          width: 20.px,
+                          // height: 20.px,
+                          backgroundColor: Colors.blue,
+                        ),
+                      ),
                       Box(
                         style: Style(
                           width: 20.px,
@@ -127,7 +147,7 @@ class MyAppState extends State<MyApp> {
                     style: Style(
                       alignSelf: ItemAlignment.CENTER,
                       width: 220.px,
-                      height: 190.px,
+                      height: 250.px,
                       backgroundColor: Colors.blue,
                       margin: EdgeInsetsUnit.only(
                         // top: 30.px,
@@ -140,10 +160,19 @@ class MyAppState extends State<MyApp> {
                         right: 20.px,
                         bottom: 20.px,
                       ),
+                      border: BorderEdgeInsetsUnit.all(
+                        BorderSideUnit(
+                          style: BorderUnitStyle.SOLID,
+                          width: 2.px,
+                          color: Colors.white,
+                        )
+                      ),
                       flexDirection: FlexDirection.VERTICAL,
+                      // flexDirection: FlexDirection.VERTICAL_REVERSE,
+                      justifyContent: ContentAlignment.SPACE_BETWEEN,
                       columnGap: 10.px,
                       rowGap: 10.px,
-                      overflow: Overflow.HIDDEN,
+                      overflow: Overflow.VISIBLE,
                     ),
                     children: [
                       Box(
@@ -205,11 +234,116 @@ class MyAppState extends State<MyApp> {
                           backgroundColor: Colors.white,
                           flexDirection: FlexDirection.HORIZONTAL,
                           justifyContent: ContentAlignment.CENTER,
+                          alignItems: ItemAlignment.CENTER,
                         ),
                         children: [
                           Box(
                             style: Style(
-                              alignSelf: ItemAlignment.CENTER,
+                              width: 90.px,
+                              height: 40.px,
+                              backgroundColor: Colors.red,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Box(
+                    style: Style(
+                      alignSelf: ItemAlignment.CENTER,
+                      width: 300.px,
+                      height: 250.px,
+                      backgroundColor: Colors.blue,
+                      margin: EdgeInsetsUnit.only(
+                        // top: 30.px,
+                        // left: 20.px,
+                        // right: (40).px,
+                      ),
+                      padding: EdgeInsetsUnit.only(
+                        top: 20.px,
+                        left: 20.px,
+                        right: 20.px,
+                        bottom: 20.px,
+                      ),
+                      border: BorderEdgeInsetsUnit.all(
+                        BorderSideUnit(
+                          style: BorderUnitStyle.SOLID,
+                          width: 2.px,
+                          color: Colors.white,
+                        )
+                      ),
+                      flexDirection: FlexDirection.HORIZONTAL,
+                      // flexDirection: FlexDirection.HORIZONTAL_REVERSE,
+                      justifyContent: ContentAlignment.FLEX_END,
+                      columnGap: 20.px,
+                      rowGap: 10.px,
+                      overflow: Overflow.VISIBLE,
+                    ),
+                    children: [
+                      Box(
+                        style: Style(
+                          alignSelf: ItemAlignment.FLEX_END,
+                          width: Unit.auto,
+                          height: Unit.auto,
+                          backgroundColor: Colors.orange,
+                        ),
+                        children: [
+                          Text('Text', style: TextStyle(fontSize: 16),),
+                        ],
+                      ),
+                      Box(
+                        style: Style(
+                          alignSelf: ItemAlignment.STRETCH,
+                          // width: 50.px,
+                          // height: 50.px,
+                          backgroundColor: Colors.red,
+                          margin: EdgeInsetsUnit.only(
+                            // top: 30.px,
+                            // left: 20.px,
+                            // right: 40.px,
+                          ),
+                          padding: EdgeInsetsUnit.only(
+                            top: 5.px,
+                            left: 5.px,
+                            right: 5.px,
+                            bottom: 5.px,
+                          ),
+                          justifyContent: ContentAlignment.CENTER,
+                        ),
+                        children: [
+                          Box(
+                            style: Style(
+                              width: 30.px,
+                              height: 30.px,
+                              backgroundColor: Colors.white,
+                              justifyContent: ContentAlignment.CENTER,
+                            ),
+                            children: [
+                              Box(
+                                style: Style(
+                                  alignSelf: ItemAlignment.CENTER,
+                                  width: 10.px,
+                                  height: 10.px,
+                                  backgroundColor: Colors.black,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      Box(
+                        style: Style(
+                          alignSelf: ItemAlignment.CENTER,
+                          width: 70.px,
+                          height: 70.px,
+                          backgroundColor: Colors.white,
+                          flexDirection: FlexDirection.HORIZONTAL,
+                          justifyContent: ContentAlignment.CENTER,
+                          alignItems: ItemAlignment.CENTER,
+                        ),
+                        children: [
+                          Box(
+                            style: Style(
                               width: 90.px,
                               height: 40.px,
                               backgroundColor: Colors.red,
