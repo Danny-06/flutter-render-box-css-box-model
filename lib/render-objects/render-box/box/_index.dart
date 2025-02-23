@@ -475,8 +475,8 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     final childConstraints = (
       isParentAutoSizedByContent
         ? BoxConstraints(
-          maxWidth: this.parentConstrainedWidth,
-          maxHeight: this.parentConstrainedHeight,
+          maxWidth: this.constraints.maxWidth,
+          maxHeight: this.constraints.maxHeight,
         )
         : BoxConstraints(
             maxWidth: boxModel.contentBox.width,

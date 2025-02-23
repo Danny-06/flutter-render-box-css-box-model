@@ -168,7 +168,16 @@ class MyAppState extends State<MyApp> {
                         ),
                       ],
                     ),
-                    ElevatedButton(onPressed: () {}, child: Text('SES')),
+                    Box(
+                      style: Style(
+                        // width: 100.px,
+                        // height: 80.px,
+                        alignSelf: ItemAlignment.CENTER,
+                      ),
+                      children: [
+                        ElevatedButton(onPressed: () {}, child: Text('SES')),
+                      ],
+                    ),
                     Box(
                       style: Style(
                         width: 80.px,
