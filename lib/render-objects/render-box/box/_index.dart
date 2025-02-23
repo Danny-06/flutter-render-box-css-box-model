@@ -347,9 +347,11 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
   @override
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     RenderBox? child = lastChild;
+
     while (child != null) {
       // The x, y parameters have the top left of the node's box as the origin.
-      final ContainerBoxParentData<RenderBox> childParentData = child.parentData! as ContainerBoxParentData<RenderBox>;
+      final childParentData = child.parentData! as ContainerBoxParentData<RenderBox>;
+
       final bool isHit = result.addWithPaintOffset(
         offset: childParentData.offset + this.boxModel!.contentBoxOffset,
         position: position,
@@ -357,11 +359,14 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
           return child!.hitTest(result, position: transformed);
         },
       );
+
       if (isHit) {
         return true;
       }
+
       child = childParentData.previousSibling;
     }
+
     return false;
   }
 
