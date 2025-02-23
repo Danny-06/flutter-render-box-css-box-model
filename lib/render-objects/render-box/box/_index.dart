@@ -322,11 +322,16 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
     this.defaultPaint(context, offset + boxModel.contentBoxOffset);
   }
+
   @override
   bool get isRepaintBoundary => this.style.opacity != 1 && this.style.opacity != 0;
 
   @override
   OffsetLayer updateCompositedLayer({required covariant OpacityLayer? oldLayer}) {
+    if (this.style.opacity == 0 || this.style.opacity == 1) {
+      return super.updateCompositedLayer(oldLayer: oldLayer);
+    }
+
     final OpacityLayer layer = oldLayer ?? OpacityLayer();
     layer.alpha = ui.Color.getAlphaFromOpacity(this.style.opacity);
     return layer;
@@ -345,7 +350,23 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
   @override
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
-    return this.defaultHitTestChildren(result, position: position);
+    RenderBox? child = lastChild;
+    while (child != null) {
+      // The x, y parameters have the top left of the node's box as the origin.
+      final ContainerBoxParentData<RenderBox> childParentData = child.parentData! as ContainerBoxParentData<RenderBox>;
+      final bool isHit = result.addWithPaintOffset(
+        offset: childParentData.offset + this.boxModel!.contentBoxOffset,
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset transformed) {
+          return child!.hitTest(result, position: transformed);
+        },
+      );
+      if (isHit) {
+        return true;
+      }
+      child = childParentData.previousSibling;
+    }
+    return false;
   }
 
   @override
@@ -410,6 +431,10 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
     // To support scrollers
     if (this.style.expandChild) {
+      if (this.childCount > 1) {
+        throw AssertionError('Cannot use expandChild if children length is greater than 1');
+      }
+
       final child = this.firstChild!;
 
       child.layout(

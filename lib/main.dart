@@ -50,7 +50,12 @@ class MyAppState extends State<MyApp> {
               width: 1.pr,
               height: 1.pr,
               backgroundColor: Color.fromRGBO(50, 50, 50, 1),
-              padding: EdgeInsetsUnit.all(10.px),
+              padding: EdgeInsetsUnit.only(
+                top: 10.px,
+                left: 10.px,
+                right: 10.px,
+                bottom: 10.px,
+              ),
               expandChild: true,
             ),
             children: [
@@ -163,6 +168,7 @@ class MyAppState extends State<MyApp> {
                         ),
                       ],
                     ),
+                    ElevatedButton(onPressed: () {}, child: Text('SES')),
                     Box(
                       style: Style(
                         width: 80.px,
@@ -289,7 +295,7 @@ class MyAppState extends State<MyApp> {
                             backgroundColor: Colors.orange,
                           ),
                           children: [
-                            Text('Text', style: TextStyle(fontSize: 16),),
+                            ElevatedButton(onPressed: () {}, child: Text('SES')),
                           ],
                         ),
                         Box(
