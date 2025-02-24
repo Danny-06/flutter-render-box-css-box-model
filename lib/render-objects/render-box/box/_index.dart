@@ -107,13 +107,22 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     }
   }
 
-  // @override
-  // BoxConstraints get constraints {
-  //   return BoxConstraints(
-  //     maxWidth: super.constraints.maxWidth,
-  //     maxHeight: super.constraints.maxHeight,
-  //   );
-  // }
+  BoxConstraints? _dryLayoutConstraints;
+
+  @override
+  BoxConstraints get constraints {
+    if (this._dryLayoutConstraints != null) {
+      return BoxConstraints(
+        maxWidth: this._dryLayoutConstraints!.maxWidth,
+        maxHeight: this._dryLayoutConstraints!.maxHeight,
+      );
+    }
+
+    return BoxConstraints(
+      maxWidth: super.constraints.maxWidth,
+      maxHeight: super.constraints.maxHeight,
+    );
+  }
 
   BoxParentData? get boxParentData {
     final parentData = this.parentData;
@@ -159,6 +168,24 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
   @override
   void performLayout() {
+    this._performLayout();
+  }
+
+  @override
+  Size computeDryLayout(covariant BoxConstraints constraints) {
+    this._dryLayoutConstraints = constraints;
+
+    this._performLayout(isDryLayout: true);
+
+    this._dryLayoutConstraints = null;
+
+    return Size(
+      this.boxModel!.horizontalSpace,
+      this.boxModel!.verticalSpace,
+    );
+  }
+
+  void _performLayout({bool isDryLayout = false}) {
     final computedMinWidth = this.resolveMinWidth(this.style.minWidth);
 
     final computedMaxWidth = this.resolveMaxWidth(this.style.maxWidth);
@@ -171,9 +198,9 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
     final computedHeight = this.resolveHeight(this.style.height)?.clamp(computedMinHeight, computedMaxHeight);
 
-    final isParentAutoSizedByContent = computedWidth == null || computedHeight == null;
+    final isAutoSizedByContent = computedWidth == null || computedHeight == null;
 
-    if (!isParentAutoSizedByContent) {
+    if (!isAutoSizedByContent) {
       final boxModel = BoxModel(
         boxSizing: this.style.boxSizing,
         width: computedWidth,
@@ -193,12 +220,14 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
         ),
       );
 
-      this.size = Size(
-        boxModel.horizontalSpace,
-        boxModel.verticalSpace,
-      );
-
       this.boxModel = boxModel;
+
+      if (!isDryLayout) {
+        this.size = Size(
+          boxModel.horizontalSpace,
+          boxModel.verticalSpace,
+        );
+      }
     }
     else {
       final boxParentData = (this.parentData is BoxParentData) ? this.parentData as BoxParentData : null;
@@ -231,19 +260,21 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
         ),
       );
 
-      this.size = Size(
-        boxModel.horizontalSpace,
-        boxModel.verticalSpace,
-      );
-
       this.boxModel = boxModel;
+
+      if (!isDryLayout) {
+        this.size = Size(
+          boxModel.horizontalSpace,
+          boxModel.verticalSpace,
+        );
+      }
     }
 
     final (contentWidth, contentHeight) = (
-      this.flexLayout(isParentAutoSizedByContent)
+      this.flexLayout(isAutoSizedByContent)
     );
 
-    if (isParentAutoSizedByContent) {
+    if (isAutoSizedByContent) {
       final boxParentData = (this.parentData is BoxParentData) ? this.parentData as BoxParentData : null;
 
       final direction = boxParentData?.direction;
@@ -274,12 +305,14 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
         ),
       );
 
-      this.size = Size(
-        boxModel.horizontalSpace,
-        boxModel.verticalSpace,
-      );
-
       this.boxModel = boxModel;
+
+      if (!isDryLayout) {
+        this.size = Size(
+          boxModel.horizontalSpace,
+          boxModel.verticalSpace,
+        );
+      }
     }
   }
 
@@ -306,10 +339,10 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
     final rRect = RRect.fromRectAndCorners(
       rect,
-      topLeft: const Radius.circular(0),
-      topRight: const Radius.circular(0),
-      bottomLeft: const Radius.circular(0),
-      bottomRight: const Radius.circular(0),
+      topLeft: this.style.borderRadius.topLeft,
+      topRight: this.style.borderRadius.topRight,
+      bottomLeft: this.style.borderRadius.bottomLeft,
+      bottomRight: this.style.borderRadius.bottomRight,
     );
 
     canvas.drawRRect(rRect, paint);
@@ -429,7 +462,7 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     return computedValue;
   }
 
-  (double contentWidth, double contentHeight) flexLayout(isParentAutoSizedByContent) {
+  (double contentWidth, double contentHeight) flexLayout(isAutoSizedByContent) {
     final boxModel = this.boxModel!;
 
     // To support scrollers
@@ -475,7 +508,7 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     final columnGap = this.resolveUnit(this.style.columnGap, direction: Axis.vertical) ?? 0;
 
     final childConstraints = (
-      isParentAutoSizedByContent
+      isAutoSizedByContent
         ? BoxConstraints(
           maxWidth: this.constraints.maxWidth,
           maxHeight: this.constraints.maxHeight,
@@ -527,10 +560,14 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
         }
       }
 
+      late final Size childSize;
+
       child.layout(
         childConstraints,
         parentUsesSize: true,
       );
+
+      childSize = child.size;
 
       final hasSize = (
         FlexDirection.isVertical(this.style.flexDirection) && (this.style.width != Unit.auto || this.boxParentData?.horizontalFlexSize != null)
@@ -551,19 +588,19 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
           case ItemAlignment.FLEX_END:
             if (FlexDirection.isVertical(this.style.flexDirection)) {
-              childParentData.offset = Offset(boxModel.contentBox.width - child.size.width, totalDy);
+              childParentData.offset = Offset(boxModel.contentBox.width - childSize.width, totalDy);
             }
             else {
-              childParentData.offset = Offset(totalDx, boxModel.contentBox.height - child.size.height);
+              childParentData.offset = Offset(totalDx, boxModel.contentBox.height - childSize.height);
             }
           break;
 
           case ItemAlignment.CENTER:
             if (FlexDirection.isVertical(this.style.flexDirection)) {
-              childParentData.offset = Offset(boxModel.contentBox.width / 2 - child.size.width / 2, totalDy);
+              childParentData.offset = Offset(boxModel.contentBox.width / 2 - childSize.width / 2, totalDy);
             }
             else {
-              childParentData.offset = Offset(totalDx, boxModel.contentBox.height / 2 - child.size.height / 2);
+              childParentData.offset = Offset(totalDx, boxModel.contentBox.height / 2 - childSize.height / 2);
             }
           break;
 
@@ -587,16 +624,16 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
         }
       }
 
-      maxChildWidth = Math.max(maxChildWidth, child.size.width);
-      maxChildHeight = Math.max(maxChildHeight, child.size.height);
+      maxChildWidth = Math.max(maxChildWidth, childSize.width);
+      maxChildHeight = Math.max(maxChildHeight, childSize.height);
 
       if (FlexDirection.isVertical(this.style.flexDirection)) {
-        contentHeight += child.size.height + rowGap;
-        totalDy += child.size.height + rowGap;
+        contentHeight += childSize.height + rowGap;
+        totalDy += childSize.height + rowGap;
       }
       else {
-        contentWidth += child.size.width + columnGap;
-        totalDx += child.size.width + columnGap;
+        contentWidth += childSize.width + columnGap;
+        totalDx += childSize.width + columnGap;
       }
     }
 

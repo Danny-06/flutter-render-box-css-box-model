@@ -477,6 +477,7 @@ class MyAppState extends State<MyApp> {
                     Box(
                       style: Style(
                         alignSelf: ItemAlignment.CENTER,
+                        boxSizing: BoxSizing.CONTENT_BOX,
                         width: 300.px,
                         height: 400.px,
                         backgroundColor: Colors.black,
@@ -486,7 +487,7 @@ class MyAppState extends State<MyApp> {
                           right: 20.px,
                           bottom: 20.px,
                         ),
-                        rowGap: 10.px,
+                        // rowGap: 10.px,
                       ),
                       children: [
                         Box(
@@ -517,6 +518,7 @@ class MyAppState extends State<MyApp> {
                     ),
                     Box(
                       style: Style(
+                        boxSizing: BoxSizing.CONTENT_BOX,
                         alignSelf: ItemAlignment.CENTER,
                         width: 400.px,
                         height: 300.px,
@@ -528,7 +530,7 @@ class MyAppState extends State<MyApp> {
                           bottom: 20.px,
                         ),
                         flexDirection: FlexDirection.HORIZONTAL,
-                        columnGap: 10.px,
+                        // columnGap: 10.px,
                       ),
                       children: [
                         Box(

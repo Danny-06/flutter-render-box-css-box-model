@@ -8,6 +8,7 @@ class Style {
     this.boxSizing = BoxSizing.BORDER_BOX,
     this.margin,
     this.border,
+    this.borderRadius = BorderRadius.zero,
     this.padding,
     this.width = Unit.auto,
     this.minWidth,
@@ -39,6 +40,8 @@ class Style {
   final EdgeInsetsUnit? margin;
 
   final BorderEdgeInsetsUnit? border;
+
+  final BorderRadius borderRadius;
 
   final EdgeInsetsUnit? padding;
 
