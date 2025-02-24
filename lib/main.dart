@@ -404,6 +404,7 @@ class MyAppState extends State<MyApp> {
                         Box(
                           style: Style(
                             alignSelf: ItemAlignment.FLEX_END,
+                            flexGrow: 1,
                             width: Unit.auto,
                             height: Unit.auto,
                             backgroundColor: Colors.orange,
@@ -414,6 +415,7 @@ class MyAppState extends State<MyApp> {
                         ),
                         Box(
                           style: Style(
+                            flexGrow: 1,
                             alignSelf: ItemAlignment.STRETCH,
                             // width: 50.px,
                             // height: 50.px,

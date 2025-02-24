@@ -522,6 +522,9 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     var contentWidth = 0.0;
     var contentHeight = 0.0;
 
+    var flexGrowContentWidth = 0.0;
+    var flexGrowContentHeight = 0.0;
+
     var maxChildWidth = 0.0;
     var maxChildHeight = 0.0;
 
@@ -643,10 +646,18 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
       if (FlexDirection.isVertical(this.style.flexDirection)) {
         contentHeight += childSize.height + rowGap;
         totalDy += childSize.height + rowGap;
+
+        if (child is StyledRenderBox && child.style.flexGrow > 0) {
+          flexGrowContentHeight += childSize.height;
+        }
       }
       else {
         contentWidth += childSize.width + columnGap;
         totalDx += childSize.width + columnGap;
+
+        if (child is StyledRenderBox && child.style.flexGrow > 0) {
+          flexGrowContentWidth += childSize.width;
+        }
       }
     }
 
@@ -664,8 +675,8 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
     final availableSpaceInMainAxis = (
       FlexDirection.isVertical(this.style.flexDirection)
-        ? boxModel.contentBox.height - contentHeight
-        : boxModel.contentBox.width - contentWidth
+        ? boxModel.contentBox.height - (contentHeight - flexGrowContentHeight)
+        : boxModel.contentBox.width - (contentWidth - flexGrowContentWidth)
     );
 
     if (!isDry) {
