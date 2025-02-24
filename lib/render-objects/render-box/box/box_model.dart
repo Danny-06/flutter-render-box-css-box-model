@@ -60,27 +60,56 @@ class BoxModel {
       );
     }
 
-    if (this.direction == Axis.vertical && this.horizontalFlexSize != null && this.width == null) {
-      this.borderBoxSize = Size(
-        this.horizontalFlexSize! - this.margin.horizontal,
-        this.borderBoxSize.height,
-      );
+    if (this.direction == Axis.vertical) {
+      if (this.horizontalFlexSize != null && this.width == null) {
+        this.borderBoxSize = Size(
+          this.horizontalFlexSize! - this.margin.horizontal,
+          this.borderBoxSize.height,
+        );
 
-      this.contentBox = Size(
-        this.borderBoxSize.width - this.paddingBox.horizontal,
-        this.contentBox.height,
-      );
+        this.contentBox = Size(
+          this.borderBoxSize.width - this.paddingBox.horizontal,
+          this.contentBox.height,
+        );
+      }
+
+      if (this.verticalFlexSize != null) {
+        this.borderBoxSize = Size(
+          this.borderBoxSize.width,
+          this.verticalFlexSize! - this.margin.horizontal,
+        );
+
+        this.contentBox = Size(
+          this.contentBox.width,
+          this.borderBoxSize.height - this.paddingBox.vertical,
+        );
+      }
     }
-    else if (this.direction == Axis.horizontal && this.verticalFlexSize != null && this.height == null) {
-      this.borderBoxSize = Size(
-        this.borderBoxSize.width,
-        this.verticalFlexSize! - this.margin.vertical,
-      );
+    else
+    if (this.direction == Axis.horizontal) {
+      if (this.verticalFlexSize != null && this.height == null) {
+        this.borderBoxSize = Size(
+          this.borderBoxSize.width,
+          this.verticalFlexSize! - this.margin.vertical,
+        );
 
-      this.contentBox = Size(
-        this.contentBox.width,
-        this.borderBoxSize.height - this.paddingBox.vertical,
-      );
+        this.contentBox = Size(
+          this.contentBox.width,
+          this.borderBoxSize.height - this.paddingBox.vertical,
+        );
+      }
+
+      if (this.horizontalFlexSize != null) {
+        this.borderBoxSize = Size(
+          this.horizontalFlexSize! - this.margin.horizontal,
+          this.borderBoxSize.height,
+        );
+
+        this.contentBox = Size(
+          this.borderBoxSize.width - this.paddingBox.horizontal,
+          this.contentBox.height,
+        );
+      }
     }
 
     this.horizontalSpace = this.borderBoxSize.width + this.margin.horizontal;

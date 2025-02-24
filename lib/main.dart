@@ -474,6 +474,86 @@ class MyAppState extends State<MyApp> {
                         ),
                       ],
                     ),
+                    Box(
+                      style: Style(
+                        alignSelf: ItemAlignment.CENTER,
+                        width: 300.px,
+                        height: 400.px,
+                        backgroundColor: Colors.black,
+                        padding: EdgeInsetsUnit.only(
+                          top: 20.px,
+                          left: 20.px,
+                          right: 20.px,
+                          bottom: 20.px,
+                        ),
+                        rowGap: 10.px,
+                      ),
+                      children: [
+                        Box(
+                          style: Style(
+                            width: 1.pr,
+                            // height: 100.px,
+                            flexGrow: 1,
+                            backgroundColor: Colors.lightGreenAccent,
+                          ),
+                        ),
+                        Box(
+                          style: Style(
+                            width: 1.pr,
+                            // height: 200.px,
+                            flexGrow: 2,
+                            backgroundColor: Colors.purpleAccent,
+                          ),
+                        ),
+                        Box(
+                          style: Style(
+                            width: 1.pr,
+                            // height: 100.px,
+                            flexGrow: 1,
+                            backgroundColor: Colors.lightGreenAccent,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Box(
+                      style: Style(
+                        alignSelf: ItemAlignment.CENTER,
+                        width: 400.px,
+                        height: 300.px,
+                        backgroundColor: Colors.black,
+                        padding: EdgeInsetsUnit.only(
+                          top: 20.px,
+                          left: 20.px,
+                          right: 20.px,
+                          bottom: 20.px,
+                        ),
+                        flexDirection: FlexDirection.HORIZONTAL,
+                        columnGap: 10.px,
+                      ),
+                      children: [
+                        Box(
+                          style: Style(
+                            height: 1.pr,
+                            flexGrow: 1,
+                            backgroundColor: Colors.lightGreenAccent,
+                          ),
+                        ),
+                        Box(
+                          style: Style(
+                            height: 1.pr,
+                            flexGrow: 2,
+                            backgroundColor: Colors.purpleAccent,
+                          ),
+                        ),
+                        Box(
+                          style: Style(
+                            height: 1.pr,
+                            flexGrow: 1,
+                            backgroundColor: Colors.lightGreenAccent,
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),

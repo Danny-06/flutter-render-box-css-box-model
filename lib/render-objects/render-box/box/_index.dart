@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' hide BorderSide;
 import 'package:flutter/rendering.dart' hide BorderSide;
@@ -484,11 +486,23 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
           )
     );
 
+    var totalFlexGrow = 0.0;
+
+    final isMainAxisAutoSized = (
+      FlexDirection.isVertical(this.style.flexDirection)
+        ? this.style.height == Unit.auto
+        : this.style.width == Unit.auto
+    );
+
     for (final (child, _) in childrenIterable) {
       final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
 
       if (childParentData is BoxParentData) {
         childParentData.direction = FlexDirection.getAxisFrom(this.style.flexDirection);
+      }
+
+      if (!isMainAxisAutoSized && child is StyledRenderBox) {
+        totalFlexGrow += child.style.flexGrow;
       }
 
       final itemAlignment = () {
@@ -591,305 +605,340 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
     if (FlexDirection.isVertical(this.style.flexDirection)) {
       contentHeight -= rowGap;
-    }
-    else {
-      contentWidth -= columnGap;
-    }
-    
-
-    if (FlexDirection.isVertical(this.style.flexDirection)) {
       contentWidth = maxChildWidth;
     }
     else {
+      contentWidth -= columnGap;
       contentHeight = maxChildHeight;
     }
 
-    switch (this.style.justifyContent) {
+    final availableSpaceInMainAxis = (
+      FlexDirection.isVertical(this.style.flexDirection)
+        ? boxModel.contentBox.height - contentHeight
+        : boxModel.contentBox.width - contentWidth
+    );
 
-      case ContentAlignment.FLEX_START:
+    for (final (child, _) in childrenIterable) {
+      final childParentData = child.parentData;
 
-        switch (this.style.flexDirection) {
+      if (child is! StyledRenderBox) {
+        continue;
+      }
 
-          case FlexDirection.VERTICAL:
-            // Nothing to do
-          break;
+      if (childParentData is! BoxParentData) {
+        continue;
+      }
 
-          case FlexDirection.VERTICAL_REVERSE:
-            final translationValue = boxModel.contentBox.height - contentHeight;
+      if (child.style.flexGrow > 0) {
+        if (FlexDirection.isVertical(this.style.flexDirection)) {
+          childParentData.verticalFlexSize = availableSpaceInMainAxis * child.style.flexGrow / totalFlexGrow;
+
+          if (child.boxModel!.verticalFlexSize == null) {
+            Timer(Duration(milliseconds: 0), () {
+              child.markNeedsLayout();
+            });
+          }
+        }
+        else {
+          childParentData.horizontalFlexSize = availableSpaceInMainAxis * child.style.flexGrow / totalFlexGrow;
+
+          if (child.boxModel!.horizontalFlexSize == null) {
+            Timer(Duration(milliseconds: 0), () {
+              child.markNeedsLayout();
+            });
+          }
+        }
+      }
+    }
+
+    if (totalFlexGrow == 0) {
+      switch (this.style.justifyContent) {
+
+        case ContentAlignment.FLEX_START:
+
+          switch (this.style.flexDirection) {
+
+            case FlexDirection.VERTICAL:
+              // Nothing to do
+            break;
+
+            case FlexDirection.VERTICAL_REVERSE:
+              final translationValue = boxModel.contentBox.height - contentHeight;
+
+              for (final (child, _) in childrenIterable) {
+                final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
+
+                childParentData.offset = childParentData.offset.translate(0, translationValue);
+              }
+            break;
+
+            case FlexDirection.HORIZONTAL:
+              // Nothing to do
+            break;
+
+            case FlexDirection.HORIZONTAL_REVERSE:
+              final translationValue = boxModel.contentBox.width - contentWidth;
+
+              for (final (child, _) in childrenIterable) {
+                final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
+
+                childParentData.offset = childParentData.offset.translate(translationValue, 0);
+              }
+            break;
+
+          }
+
+        break;
+
+        case ContentAlignment.FLEX_END:
+
+          switch (this.style.flexDirection) {
+
+            case FlexDirection.VERTICAL:
+              final translationValue = boxModel.contentBox.height - contentHeight;
+
+              for (final (child, _) in childrenIterable) {
+                final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
+
+                childParentData.offset = childParentData.offset.translate(0, translationValue);
+              }
+            break;
+
+            case FlexDirection.VERTICAL_REVERSE:
+              // Nothing to do
+            break;
+
+            case FlexDirection.HORIZONTAL:
+              final translationValue = boxModel.contentBox.width - contentWidth;
+
+              for (final (child, _) in childrenIterable) {
+                final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
+
+                childParentData.offset = childParentData.offset.translate(translationValue, 0);
+              }
+            break;
+
+            case FlexDirection.HORIZONTAL_REVERSE:
+              // Nothing to do
+            break;
+
+          }
+
+        break;
+
+        case ContentAlignment.CENTER:
+          if (FlexDirection.isVertical(this.style.flexDirection)) {
+            final totalHeight = boxModel.contentBox.height;
+
+            final translationValue = (totalHeight - contentHeight) / 2;
 
             for (final (child, _) in childrenIterable) {
               final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
 
               childParentData.offset = childParentData.offset.translate(0, translationValue);
             }
-          break;
+          }
+          else {
+            final totalWidth = boxModel.contentBox.width;
 
-          case FlexDirection.HORIZONTAL:
-            // Nothing to do
-          break;
-
-          case FlexDirection.HORIZONTAL_REVERSE:
-            final translationValue = boxModel.contentBox.width - contentWidth;
+            final translationValue = (totalWidth - contentWidth) / 2;
 
             for (final (child, _) in childrenIterable) {
               final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
 
               childParentData.offset = childParentData.offset.translate(translationValue, 0);
             }
-          break;
+          }
+        break;
 
-        }
+        case ContentAlignment.SPACE_BETWEEN:
+          if (this.childCount == 1) {
+            break;
+          }
 
-      break;
+          if (FlexDirection.isVertical(this.style.flexDirection)) {
+            if (this.style.height == Unit.auto) {
+              break;
+            }
 
-      case ContentAlignment.FLEX_END:
+            final translationValue = (boxModel.contentBox.height - (contentHeight - (rowGap * (this.childCount - 1)))) / (this.childCount - 1);
 
-        switch (this.style.flexDirection) {
+            if (translationValue <= 0) {
+              break;
+            }
 
-          case FlexDirection.VERTICAL:
-            final translationValue = boxModel.contentBox.height - contentHeight;
+            var currentChildrenSizeOffset = 0.0;
 
-            for (final (child, _) in childrenIterable) {
+            for (final (child, index) in childrenIterable) {
               final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
 
-              childParentData.offset = childParentData.offset.translate(0, translationValue);
+              currentChildrenSizeOffset += childParentData.previousSibling?.size.height ?? 0.0;
+
+              childParentData.offset = Offset(childParentData.offset.dx, translationValue * index + currentChildrenSizeOffset);
             }
-          break;
+          }
+          else {
+            if (this.style.width == Unit.auto) {
+              break;
+            }
 
-          case FlexDirection.VERTICAL_REVERSE:
-            // Nothing to do
-          break;
+            final translationValue = (boxModel.contentBox.width - (contentWidth - (columnGap * (this.childCount - 1)))) / (this.childCount - 1);
 
-          case FlexDirection.HORIZONTAL:
-            final translationValue = boxModel.contentBox.width - contentWidth;
+            if (translationValue <= 0) {
+              break;
+            }
 
-            for (final (child, _) in childrenIterable) {
+            var currentChildrenSizeOffset = 0.0;
+
+            for (final (child, index) in childrenIterable) {
               final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
 
-              childParentData.offset = childParentData.offset.translate(translationValue, 0);
+              currentChildrenSizeOffset += childParentData.previousSibling?.size.width ?? 0.0;
+
+              childParentData.offset = Offset(translationValue * index + currentChildrenSizeOffset, childParentData.offset.dy);
             }
-          break;
-
-          case FlexDirection.HORIZONTAL_REVERSE:
-            // Nothing to do
-          break;
-
-        }
-
-      break;
-
-      case ContentAlignment.CENTER:
-        if (FlexDirection.isVertical(this.style.flexDirection)) {
-          final totalHeight = boxModel.contentBox.height;
-
-          final translationValue = (totalHeight - contentHeight) / 2;
-
-          for (final (child, _) in childrenIterable) {
-            final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
-
-            childParentData.offset = childParentData.offset.translate(0, translationValue);
           }
-        }
-        else {
-          final totalWidth = boxModel.contentBox.width;
+        break;
 
-          final translationValue = (totalWidth - contentWidth) / 2;
-
-          for (final (child, _) in childrenIterable) {
-            final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
-
-            childParentData.offset = childParentData.offset.translate(translationValue, 0);
-          }
-        }
-      break;
-
-      case ContentAlignment.SPACE_BETWEEN:
-        if (this.childCount == 1) {
-          break;
-        }
-
-        if (FlexDirection.isVertical(this.style.flexDirection)) {
-          if (this.style.height == Unit.auto) {
+        case ContentAlignment.SPACE_AROUND:
+          if (this.childCount == 1) {
             break;
           }
 
-          final translationValue = (boxModel.contentBox.height - (contentHeight - (rowGap * (this.childCount - 1)))) / (this.childCount - 1);
-
-          if (translationValue <= 0) {
-            break;
-          }
-
-          var currentChildrenSizeOffset = 0.0;
-
-          for (final (child, index) in childrenIterable) {
-            final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
-
-            currentChildrenSizeOffset += childParentData.previousSibling?.size.height ?? 0.0;
-
-            childParentData.offset = Offset(childParentData.offset.dx, translationValue * index + currentChildrenSizeOffset);
-          }
-        }
-        else {
-          if (this.style.width == Unit.auto) {
-            break;
-          }
-
-          final translationValue = (boxModel.contentBox.width - (contentWidth - (columnGap * (this.childCount - 1)))) / (this.childCount - 1);
-
-          if (translationValue <= 0) {
-            break;
-          }
-
-          var currentChildrenSizeOffset = 0.0;
-
-          for (final (child, index) in childrenIterable) {
-            final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
-
-            currentChildrenSizeOffset += childParentData.previousSibling?.size.width ?? 0.0;
-
-            childParentData.offset = Offset(translationValue * index + currentChildrenSizeOffset, childParentData.offset.dy);
-          }
-        }
-      break;
-
-      case ContentAlignment.SPACE_AROUND:
-        if (this.childCount == 1) {
-          break;
-        }
-
-        if (FlexDirection.isVertical(this.style.flexDirection)) {
-          if (this.style.height == Unit.auto) {
-            break;
-          }
-
-          final translationValue = (
-            (boxModel.contentBox.height - (contentHeight - (rowGap * (this.childCount - 1)))) / this.childCount
-          ) / 2;
-
-          if (translationValue <= 0) {
-            break;
-          }
-
-          var currentTranslationOffset = 0.0;
-
-          for (final (child, index) in childrenIterable) {
-            final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
-
-            currentTranslationOffset += translationValue;
-
-            if (index == 0) {
-              currentTranslationOffset -= rowGap * (this.childCount - 1) / 2;
+          if (FlexDirection.isVertical(this.style.flexDirection)) {
+            if (this.style.height == Unit.auto) {
+              break;
             }
 
-            if (index > 0) {
-              currentTranslationOffset += childParentData.previousSibling!.size.height + translationValue + rowGap;
+            final translationValue = (
+              (boxModel.contentBox.height - (contentHeight - (rowGap * (this.childCount - 1)))) / this.childCount
+            ) / 2;
+
+            if (translationValue <= 0) {
+              break;
             }
 
-            childParentData.offset = Offset(childParentData.offset.dx, currentTranslationOffset);
+            var currentTranslationOffset = 0.0;
+
+            for (final (child, index) in childrenIterable) {
+              final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
+
+              currentTranslationOffset += translationValue;
+
+              if (index == 0) {
+                currentTranslationOffset -= rowGap * (this.childCount - 1) / 2;
+              }
+
+              if (index > 0) {
+                currentTranslationOffset += childParentData.previousSibling!.size.height + translationValue + rowGap;
+              }
+
+              childParentData.offset = Offset(childParentData.offset.dx, currentTranslationOffset);
+            }
           }
-        }
-        else {
-          if (this.style.width == Unit.auto) {
+          else {
+            if (this.style.width == Unit.auto) {
+              break;
+            }
+
+            final translationValue = (
+              (boxModel.contentBox.width - (contentWidth - (columnGap * (this.childCount - 1)))) / this.childCount
+            ) / 2;
+
+            if (translationValue <= 0) {
+              break;
+            }
+
+            var currentTranslationOffset = 0.0;
+
+            for (final (child, index) in childrenIterable) {
+              final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
+
+              currentTranslationOffset += translationValue;
+
+              if (index == 0) {
+                currentTranslationOffset -= columnGap * (this.childCount - 1) / 2;
+              }
+
+              if (index > 0) {
+                currentTranslationOffset += childParentData.previousSibling!.size.width + translationValue + columnGap;
+              }
+
+              childParentData.offset = Offset(currentTranslationOffset, childParentData.offset.dy);
+            }
+          }
+        break;
+
+        case ContentAlignment.SPACE_EVENLY:
+          if (this.childCount == 1) {
             break;
           }
 
-          final translationValue = (
-            (boxModel.contentBox.width - (contentWidth - (columnGap * (this.childCount - 1)))) / this.childCount
-          ) / 2;
-
-          if (translationValue <= 0) {
-            break;
-          }
-
-          var currentTranslationOffset = 0.0;
-
-          for (final (child, index) in childrenIterable) {
-            final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
-
-            currentTranslationOffset += translationValue;
-
-            if (index == 0) {
-              currentTranslationOffset -= columnGap * (this.childCount - 1) / 2;
+          if (FlexDirection.isVertical(this.style.flexDirection)) {
+            if (this.style.height == Unit.auto) {
+              break;
             }
 
-            if (index > 0) {
-              currentTranslationOffset += childParentData.previousSibling!.size.width + translationValue + columnGap;
+            final translationValue = (
+              (boxModel.contentBox.height - (contentHeight - (rowGap * (this.childCount - 1)))) / (this.childCount + 1)
+            );
+
+            if (translationValue <= 0) {
+              break;
             }
 
-            childParentData.offset = Offset(currentTranslationOffset, childParentData.offset.dy);
+            var currentTranslationOffset = 0.0;
+
+            for (final (child, index) in childrenIterable) {
+              final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
+
+              currentTranslationOffset += translationValue;
+
+              if (index == 0) {
+                currentTranslationOffset -= rowGap * (this.childCount - 1) / 2;
+              }
+
+              if (index > 0) {
+                currentTranslationOffset += childParentData.previousSibling!.size.height + rowGap;
+              }
+
+              childParentData.offset = Offset(childParentData.offset.dx, currentTranslationOffset);
+            }
           }
-        }
-      break;
-
-      case ContentAlignment.SPACE_EVENLY:
-        if (this.childCount == 1) {
-          break;
-        }
-
-        if (FlexDirection.isVertical(this.style.flexDirection)) {
-          if (this.style.height == Unit.auto) {
-            break;
-          }
-
-          final translationValue = (
-            (boxModel.contentBox.height - (contentHeight - (rowGap * (this.childCount - 1)))) / (this.childCount + 1)
-          );
-
-          if (translationValue <= 0) {
-            break;
-          }
-
-          var currentTranslationOffset = 0.0;
-
-          for (final (child, index) in childrenIterable) {
-            final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
-
-            currentTranslationOffset += translationValue;
-
-            if (index == 0) {
-              currentTranslationOffset -= rowGap * (this.childCount - 1) / 2;
+          else {
+            if (this.style.width == Unit.auto) {
+              break;
             }
 
-            if (index > 0) {
-              currentTranslationOffset += childParentData.previousSibling!.size.height + rowGap;
+            final translationValue = (
+              (boxModel.contentBox.width - (contentWidth - (columnGap * (this.childCount - 1)))) / (this.childCount + 1)
+            );
+
+            if (translationValue <= 0) {
+              break;
             }
 
-            childParentData.offset = Offset(childParentData.offset.dx, currentTranslationOffset);
-          }
-        }
-        else {
-          if (this.style.width == Unit.auto) {
-            break;
-          }
+            var currentTranslationOffset = 0.0;
 
-          final translationValue = (
-            (boxModel.contentBox.width - (contentWidth - (columnGap * (this.childCount - 1)))) / (this.childCount + 1)
-          );
+            for (final (child, index) in childrenIterable) {
+              final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
 
-          if (translationValue <= 0) {
-            break;
-          }
+              currentTranslationOffset += translationValue;
 
-          var currentTranslationOffset = 0.0;
+              if (index == 0) {
+                currentTranslationOffset -= columnGap * (this.childCount - 1) / 2;
+              }
 
-          for (final (child, index) in childrenIterable) {
-            final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
+              if (index > 0) {
+                currentTranslationOffset += childParentData.previousSibling!.size.width + columnGap;
+              }
 
-            currentTranslationOffset += translationValue;
-
-            if (index == 0) {
-              currentTranslationOffset -= columnGap * (this.childCount - 1) / 2;
+              childParentData.offset = Offset(currentTranslationOffset, childParentData.offset.dy);
             }
-
-            if (index > 0) {
-              currentTranslationOffset += childParentData.previousSibling!.size.width + columnGap;
-            }
-
-            childParentData.offset = Offset(currentTranslationOffset, childParentData.offset.dy);
           }
-        }
-      break;
+        break;
 
+      }
     }
 
     return (contentWidth, contentHeight);
