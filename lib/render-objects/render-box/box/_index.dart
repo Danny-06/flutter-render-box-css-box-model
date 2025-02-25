@@ -386,6 +386,14 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     // TOP
 
     if (boxModel.borderBox.top > 0) {
+      final clipPath = (
+        Path()
+          ..moveTo(offset.dx + boxModel.paddingBoxOffset.dx, offset.dy + boxModel.paddingBoxOffset.dy)
+          ..relativeLineTo(boxModel.paddingBoxSize.width, 0)
+          ..relativeLineTo(boxModel.borderBox.right, -boxModel.borderBox.top)
+          ..relativeLineTo(-boxModel.borderBoxSize.width, 0)
+      );
+
       switch (border.topSide.style) {
 
         case BorderUnitStyle.NONE:
@@ -403,14 +411,6 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
           path.moveTo(offset.dx + boxModel.paddingBoxOffset.dx - boxModel.borderBox.left, offset.dy + boxModel.paddingBoxOffset.dy - boxModel.borderBox.top / 2);
           path.relativeLineTo(boxModel.borderBoxSize.width, 0);
-
-
-          final clipPath = Path();
-
-          clipPath.moveTo(offset.dx + boxModel.paddingBoxOffset.dx, offset.dy + boxModel.paddingBoxOffset.dy);
-          clipPath.relativeLineTo(boxModel.paddingBoxSize.width, 0);
-          clipPath.relativeLineTo(boxModel.borderBox.right, -boxModel.borderBox.top);
-          clipPath.relativeLineTo(-boxModel.borderBoxSize.width, 0);
 
           canvas.save();
 
@@ -434,6 +434,14 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     // LEFT
 
     if (boxModel.borderBox.left > 0) {
+      final clipPath = (
+        Path()
+          ..moveTo(offset.dx + boxModel.paddingBoxOffset.dx, offset.dy + boxModel.paddingBoxOffset.dy)
+          ..relativeLineTo(0, boxModel.paddingBoxSize.height)
+          ..relativeLineTo(-boxModel.borderBox.left, boxModel.borderBox.bottom)
+          ..relativeLineTo(0, -boxModel.borderBoxSize.height)
+      );
+
       switch (border.leftSide.style) {
 
         case BorderUnitStyle.NONE:
@@ -451,14 +459,6 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
           path.moveTo(offset.dx + boxModel.paddingBoxOffset.dx - boxModel.borderBox.left / 2, offset.dy + boxModel.paddingBoxOffset.dy - boxModel.borderBox.top);
           path.relativeLineTo(0, boxModel.borderBoxSize.height);
-
-
-          final clipPath = Path();
-
-          clipPath.moveTo(offset.dx + boxModel.paddingBoxOffset.dx, offset.dy + boxModel.paddingBoxOffset.dy);
-          clipPath.relativeLineTo(0, boxModel.paddingBoxSize.height);
-          clipPath.relativeLineTo(-boxModel.borderBox.left, boxModel.borderBox.bottom);
-          clipPath.relativeLineTo(0, -boxModel.borderBoxSize.height);
 
           canvas.save();
 
@@ -482,6 +482,14 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     // BOTTOM
 
     if (boxModel.borderBox.bottom > 0) {
+      final clipPath = (
+        Path()
+          ..moveTo(offset.dx + boxModel.paddingBoxOffset.dx, offset.dy + boxModel.paddingBoxOffset.dy + boxModel.paddingBoxSize.height)
+          ..relativeLineTo(boxModel.paddingBoxSize.width, 0)
+          ..relativeLineTo(boxModel.borderBox.right, boxModel.borderBox.bottom)
+          ..relativeLineTo(-boxModel.borderBoxSize.width, 0)
+      );
+
       switch (border.bottomSide.style) {
 
         case BorderUnitStyle.NONE:
@@ -499,14 +507,6 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
           path.moveTo(offset.dx + boxModel.paddingBoxOffset.dx - boxModel.borderBox.left, offset.dy + boxModel.paddingBoxOffset.dy + boxModel.paddingBoxSize.height + boxModel.borderBox.bottom / 2);
           path.relativeLineTo(boxModel.borderBoxSize.width, 0);
-
-
-          final clipPath = Path();
-
-          clipPath.moveTo(offset.dx + boxModel.paddingBoxOffset.dx, offset.dy + boxModel.paddingBoxOffset.dy + boxModel.paddingBoxSize.height);
-          clipPath.relativeLineTo(boxModel.paddingBoxSize.width, 0);
-          clipPath.relativeLineTo(boxModel.borderBox.right, boxModel.borderBox.bottom);
-          clipPath.relativeLineTo(-boxModel.borderBoxSize.width, 0);
 
           canvas.save();
 
@@ -530,6 +530,14 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     // RIGHT
 
     if (boxModel.borderBox.right > 0) {
+      final clipPath = (
+        Path()
+          ..moveTo(offset.dx + boxModel.paddingBoxOffset.dx + boxModel.paddingBoxSize.width, offset.dy + boxModel.paddingBoxOffset.dy)
+          ..relativeLineTo(0, boxModel.paddingBoxSize.height)
+          ..relativeLineTo(boxModel.borderBox.right, boxModel.borderBox.bottom)
+          ..relativeLineTo(0, -boxModel.borderBoxSize.height)
+      );
+
       switch (border.rightSide.style) {
 
         case BorderUnitStyle.NONE:
@@ -547,14 +555,6 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
           path.moveTo(offset.dx + boxModel.paddingBoxOffset.dx + boxModel.paddingBoxSize.width + boxModel.borderBox.right / 2, offset.dy + boxModel.paddingBoxOffset.dy - boxModel.borderBox.top);
           path.relativeLineTo(0, boxModel.borderBoxSize.height);
-
-
-          final clipPath = Path();
-
-          clipPath.moveTo(offset.dx + boxModel.paddingBoxOffset.dx + boxModel.paddingBoxSize.width, offset.dy + boxModel.paddingBoxOffset.dy);
-          clipPath.relativeLineTo(0, boxModel.paddingBoxSize.height);
-          clipPath.relativeLineTo(boxModel.borderBox.right, boxModel.borderBox.bottom);
-          clipPath.relativeLineTo(0, -boxModel.borderBoxSize.height);
 
           canvas.save();
 
@@ -574,10 +574,6 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
       }
     }
-  }
-
-  void drawBorderSide(PaintingContext context) {
-
   }
 
   @override
