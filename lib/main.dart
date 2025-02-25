@@ -180,49 +180,118 @@ class MyAppState extends State<MyApp> {
                     ),
                     Box(
                       style: Style(
-                        width: 80.px,
-                        height: 200.px,
-                        backgroundColor: Colors.purple,
-                        margin: EdgeInsetsUnit.only(
-                          top: (0).px,
-                          left: (50).px,
-                        ),
-                        padding: EdgeInsetsUnit.only(
-                          top: 5.px,
-                          left: 5.px,
-                          right: 5.px,
-                          bottom: 5.px,
-                        ),
-                        // rowGap: 5.px,
-                        flexDirection: FlexDirection.VERTICAL,
-                        alignItems: ItemAlignment.STRETCH,
-                        justifyContent: ContentAlignment.SPACE_EVENLY,
-                        // columnGap: 10.px,
+                        flexDirection: FlexDirection.HORIZONTAL,
+                        alignItems: ItemAlignment.CENTER,
                       ),
                       children: [
                         Box(
                           style: Style(
-                            height: 20.px,
-                            backgroundColor: Colors.blue,
+                            boxSizing: BoxSizing.CONTENT_BOX,
+                            width: 80.px,
+                            height: 200.px,
+                            backgroundColor: Colors.purple,
+                            margin: EdgeInsetsUnit.only(
+                              top: (0).px,
+                              // left: (50).px,
+                            ),
+                            padding: EdgeInsetsUnit.only(
+                              top: 5.px,
+                              left: 5.px,
+                              right: 5.px,
+                              bottom: 5.px,
+                            ),
+                            rowGap: 5.px,
+                            flexDirection: FlexDirection.VERTICAL,
+                            alignItems: ItemAlignment.STRETCH,
+                            justifyContent: ContentAlignment.SPACE_EVENLY,
+                            // borderRadius: BorderRadiusUnit.all(10.px),
+                            border: BorderEdgeInsetsUnit.all(
+                              BorderSideUnit(
+                                style: BorderUnitStyle.SOLID,
+                                width: 30.px,
+                                color: Colors.white,
+                              )
+                            ),
+                            // columnGap: 10.px,
                           ),
+                          children: [
+                            Box(
+                              style: Style(
+                                height: 20.px,
+                                backgroundColor: Colors.blue,
+                              ),
+                            ),
+                            Box(
+                              style: Style(
+                                flexGrow: 1,
+                                height: 20.px,
+                                backgroundColor: Colors.blue,
+                              ),
+                            ),
+                            Box(
+                              style: Style(
+                                height: 20.px,
+                                backgroundColor: Colors.blue,
+                              ),
+                            ),
+                            Box(
+                              style: Style(
+                                height: 20.px,
+                                backgroundColor: Colors.blue,
+                              ),
+                            ),
+                          ],
                         ),
                         Box(
                           style: Style(
-                            height: 20.px,
-                            backgroundColor: Colors.blue,
+                            boxSizing: BoxSizing.CONTENT_BOX,
+                            width: 80.px,
+                            height: 200.px,
+                            backgroundColor: Colors.purple,
+                            margin: EdgeInsetsUnit.only(
+                              top: (0).px,
+                              // left: (50).px,
+                            ),
+                            padding: EdgeInsetsUnit.only(
+                              top: 5.px,
+                              left: 5.px,
+                              right: 5.px,
+                              bottom: 5.px,
+                            ),
+                            rowGap: 5.px,
+                            flexDirection: FlexDirection.VERTICAL,
+                            alignItems: ItemAlignment.STRETCH,
+                            justifyContent: ContentAlignment.SPACE_EVENLY,
+                            // borderRadius: BorderRadiusUnit.all(10.px),
+                            // columnGap: 10.px,
                           ),
-                        ),
-                        Box(
-                          style: Style(
-                            height: 20.px,
-                            backgroundColor: Colors.blue,
-                          ),
-                        ),
-                        Box(
-                          style: Style(
-                            height: 20.px,
-                            backgroundColor: Colors.blue,
-                          ),
+                          children: [
+                            Box(
+                              style: Style(
+                                height: 20.px,
+                                backgroundColor: Colors.blue,
+                              ),
+                            ),
+                            Box(
+                              style: Style(
+                                flexGrow: 1,
+                                height: 20.px,
+                                backgroundColor: Colors.blue,
+                              ),
+                            ),
+                            Box(
+                              style: Style(
+                                height: 20.px,
+                                backgroundColor: Colors.blue,
+                              ),
+                            ),
+                            Box(
+                              style: Style(
+                                height: 20.px,
+                                backgroundColor: Colors.blue,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),

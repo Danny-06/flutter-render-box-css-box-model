@@ -8,7 +8,7 @@ class Style {
     this.boxSizing = BoxSizing.BORDER_BOX,
     this.margin,
     this.border,
-    this.borderRadius = BorderRadius.zero,
+    this.borderRadius = BorderRadiusUnit.zero,
     this.padding,
     this.width = Unit.auto,
     this.minWidth,
@@ -41,7 +41,7 @@ class Style {
 
   final BorderEdgeInsetsUnit? border;
 
-  final BorderRadius borderRadius;
+  final BorderRadiusUnit borderRadius;
 
   final EdgeInsetsUnit? padding;
 
@@ -415,5 +415,69 @@ class BorderEdgeInsetsUnit {
       bottomSide: vertical,
       leftSide: horizontal,
     );
+
+}
+
+
+class BorderRadiusUnit {
+
+  const BorderRadiusUnit({
+    this.topLeft = Unit.zero,
+    this.topRight = Unit.zero,
+    this.bottomRight = Unit.zero,
+    this.bottomLeft = Unit.zero,
+  });
+
+  const BorderRadiusUnit.all(Unit radius)
+    : this(
+      topLeft: radius,
+      topRight: radius,
+      bottomRight: radius,
+      bottomLeft: radius,
+    );
+
+  const BorderRadiusUnit.horizontal({
+    Unit left = Unit.zero,
+    Unit right = Unit.zero,
+  }) : this(
+    topLeft: left,
+    topRight: right,
+    bottomLeft: left,
+    bottomRight: right,
+  );
+
+  const BorderRadiusUnit.vertical({
+    Unit top = Unit.zero,
+    Unit bottom = Unit.zero,
+  }) : this(
+    topLeft: top,
+    topRight: top,
+    bottomLeft: bottom,
+    bottomRight: bottom,
+  );
+
+  BorderRadiusUnit copyWith({
+    Unit? topLeft,
+    Unit? topRight,
+    Unit? bottomRight,
+    Unit? bottomLeft,
+  }) {
+    return BorderRadiusUnit(
+      topLeft: topLeft ?? this.topLeft,
+      topRight: topRight ?? this.topRight,
+      bottomRight: bottomRight ?? this.bottomRight,
+      bottomLeft: bottomLeft ?? this.bottomLeft,
+    );
+  }
+
+  final Unit topLeft;
+
+  final Unit topRight;
+
+  final Unit bottomRight;
+
+  final Unit bottomLeft;
+
+  static const zero = BorderRadiusUnit();
 
 }

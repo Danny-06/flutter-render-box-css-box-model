@@ -342,10 +342,10 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
     final rRect = RRect.fromRectAndCorners(
       rect,
-      topLeft: this.style.borderRadius.topLeft,
-      topRight: this.style.borderRadius.topRight,
-      bottomLeft: this.style.borderRadius.bottomLeft,
-      bottomRight: this.style.borderRadius.bottomRight,
+      topLeft: Radius.circular(this.resolveUnit(this.style.borderRadius.topLeft)!),
+      topRight: Radius.circular(this.resolveUnit(this.style.borderRadius.topRight)!),
+      bottomLeft: Radius.circular(this.resolveUnit(this.style.borderRadius.bottomLeft)!),
+      bottomRight: Radius.circular(this.resolveUnit(this.style.borderRadius.bottomRight)!),
     );
 
     canvas.drawRRect(rRect, paint);
@@ -354,7 +354,57 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
       canvas.clipRRect(rRect);
     }
 
+    if (this.style.border != null) {
+      final borderRRect = RRect.fromRectAndCorners(
+        (offset + boxModel.borderBoxOffset) & boxModel.borderBoxSize,
+        topLeft: Radius.elliptical(rRect.tlRadiusX, rRect.tlRadiusY),
+        topRight: Radius.elliptical(rRect.trRadiusX, rRect.trRadiusY),
+        bottomLeft: Radius.elliptical(rRect.blRadiusX, rRect.blRadiusY),
+        bottomRight: Radius.elliptical(rRect.brRadiusX, rRect.brRadiusY),
+      );
+
+      this.drawBorder(context, borderRRect);
+    }
+
     this.defaultPaint(context, offset + boxModel.contentBoxOffset);
+  }
+
+  void drawBorder(PaintingContext context, RRect rRect) {
+    final border = this.style.border;
+
+    if (border == null) {
+      return;
+    }
+
+    final canvas = context.canvas;
+
+    final paint = Paint();
+
+    paint.color = Colors.white;
+    paint.style = PaintingStyle.stroke;
+    paint.strokeWidth = this.resolveUnit(border.topSide.width)!;
+
+    () {
+      final path = Path();
+
+      path.moveTo(rRect.center.dx - rRect.width / 2 + paint.strokeWidth / 2, rRect.center.dy + rRect.height / 2);
+      path.lineTo(rRect.center.dx - rRect.width / 2 + paint.strokeWidth / 2, rRect.center.dy - rRect.height / 2);
+
+      canvas.drawPath(path, paint);
+    }();
+
+    () {
+      final path = Path();
+
+      path.moveTo(rRect.center.dx + rRect.width / 2 - paint.strokeWidth / 2, rRect.center.dy + rRect.height / 2);
+      path.lineTo(rRect.center.dx + rRect.width / 2 - paint.strokeWidth / 2, rRect.center.dy - rRect.height / 2);
+
+      canvas.drawPath(path, paint);
+    }();
+  }
+
+  void drawBorderSide(PaintingContext context) {
+
   }
 
   @override
@@ -533,6 +583,11 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
     var totalFlexGrow = 0.0;
 
+    final hasSize = (
+      FlexDirection.isVertical(this.style.flexDirection) && (this.style.width != Unit.auto || this.boxParentData?.horizontalFlexSize != null)
+      || !FlexDirection.isVertical(this.style.flexDirection) && (this.style.height != Unit.auto || this.boxParentData?.verticalFlexSize != null)
+    );
+
     for (final (child, _) in childrenIterable) {
       final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
 
@@ -584,11 +639,6 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
           childSize = child.size;
         }
       }
-
-      final hasSize = (
-        FlexDirection.isVertical(this.style.flexDirection) && (this.style.width != Unit.auto || this.boxParentData?.horizontalFlexSize != null)
-        || !FlexDirection.isVertical(this.style.flexDirection) && (this.style.height != Unit.auto || this.boxParentData?.verticalFlexSize != null)
-      );
 
       if (hasSize) {
         switch (itemAlignment) {
@@ -705,6 +755,8 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
         child.layout(childConstraints, parentUsesSize: true);
 
+        final childSize = child.size;
+
         if (FlexDirection.isVertical(this.style.flexDirection)) {
           childParentData.offset = Offset(childParentData.offset.dx, totalDy);
           totalDy += child.size.height + rowGap;
@@ -712,6 +764,59 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
         else {
           childParentData.offset = Offset(totalDx, childParentData.offset.dy);
           totalDx += child.size.width + columnGap;
+        }
+
+        final itemAlignment = () {
+          if (child.style.alignSelf != null) {
+            return child.style.alignSelf!;
+          }
+          else {
+            return this.style.alignItems;
+          }
+        }();
+
+        // Support cross axis alignment on boxed with auto size
+
+        if (!hasSize) {
+          switch (itemAlignment) {
+
+            case ItemAlignment.FLEX_START:
+              if (FlexDirection.isVertical(this.style.flexDirection)) {
+                childParentData.offset = Offset(childParentData.offset.dx, childParentData.offset.dy);
+              }
+              else {
+                childParentData.offset = Offset(childParentData.offset.dx, childParentData.offset.dy);
+              }
+            break;
+
+            case ItemAlignment.FLEX_END:
+              if (FlexDirection.isVertical(this.style.flexDirection)) {
+                childParentData.offset = Offset(contentWidth - childSize.width, childParentData.offset.dy);
+              }
+              else {
+                childParentData.offset = Offset(childParentData.offset.dx, contentHeight - childSize.height);
+              }
+            break;
+
+            case ItemAlignment.CENTER:
+              if (FlexDirection.isVertical(this.style.flexDirection)) {
+                childParentData.offset = Offset(contentWidth / 2 - childSize.width / 2, childParentData.offset.dy);
+              }
+              else {
+                childParentData.offset = Offset(childParentData.offset.dx, contentHeight / 2 - childSize.height / 2);
+              }
+            break;
+
+            case ItemAlignment.STRETCH:
+              if (FlexDirection.isVertical(this.style.flexDirection)) {
+                childParentData.offset = Offset(childParentData.offset.dx, childParentData.offset.dy);
+              }
+              else {
+                childParentData.offset = Offset(childParentData.offset.dx, childParentData.offset.dy);
+              }
+            break;
+
+          }
         }
       }
 
