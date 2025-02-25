@@ -29,6 +29,7 @@ linter:
     unnecessary_brace_in_string_interps: false
     constant_identifier_names: false
     library_prefixes: false
+    no_leading_underscores_for_local_identifiers: false
     # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
 
 # Additional information about this file can be found at

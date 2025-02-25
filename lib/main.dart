@@ -282,7 +282,7 @@ class MyAppState extends State<MyApp> {
                             alignItems: ItemAlignment.STRETCH,
                             justifyContent: ContentAlignment.SPACE_EVENLY,
 
-                            borderRadius: BorderRadiusUnit.all(10.px),
+                            // borderRadius: BorderRadiusUnit.all(10.px),
                             // overflow: Overflow.HIDDEN,
 
                             border: BorderEdgeInsetsUnit.only(
@@ -293,7 +293,7 @@ class MyAppState extends State<MyApp> {
                               ),
                               topSide: BorderSideUnit(
                                 style: BorderUnitStyle.DASHED,
-                                width: 30.px,
+                                width: 10.px,
                                 color: Colors.teal,
                               ),
                               rightSide: BorderSideUnit(

@@ -23,6 +23,7 @@ class BoxModel {
     this.direction,
     this.horizontalFlexSize,
     this.verticalFlexSize,
+    this.borderRadius = BorderRadius.zero,
   }) {
     final width = this.width;
     final height = this.height;
@@ -137,6 +138,8 @@ class BoxModel {
   }
 
   final BoxSizing boxSizing;
+
+  final BorderRadius borderRadius;
 
   late final double horizontalSpace;
 
