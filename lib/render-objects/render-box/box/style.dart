@@ -308,8 +308,8 @@ class EdgeInsetsUnit {
     );
 
   const EdgeInsetsUnit.symmetric({
-    required Unit horizontal,
-    required Unit vertical,
+    Unit horizontal = Unit.zero,
+    Unit vertical = Unit.zero,
   }) : this.only(
       top: vertical,
       right: horizontal,

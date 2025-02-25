@@ -290,19 +290,9 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     if (isAutoSizedByContent) {
       final previousBoxModel = this.boxModel!;
 
-      final boxModel = BoxModel(
-        direction: previousBoxModel.direction,
-        horizontalFlexSize: previousBoxModel.horizontalFlexSize,
-        verticalFlexSize: previousBoxModel.verticalFlexSize,
-        boxSizing: previousBoxModel.boxSizing,
-        width: previousBoxModel.width,
-        height: previousBoxModel.height,
+      final boxModel = previousBoxModel.copyWith(
         contentWidth: contentWidth.clamp(computedMinWidth, computedMaxWidth),
         contentHeight: contentHeight.clamp(computedMinHeight, computedMaxHeight),
-        margin: previousBoxModel.margin,
-        borderBox: previousBoxModel.borderBox,
-        paddingBox: previousBoxModel.paddingBox,
-        borderRadius: previousBoxModel.borderRadius,
       );
 
       this.boxModel = boxModel;
@@ -381,6 +371,12 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     // final _segments = (segments.length % 2 == 0 ? segments : [...segments, ...segments]).map((segment) => segment.abs()).toList();
     final _segments = segments.map((segment) => segment.abs()).toList();
 
+    for (final segment in _segments) {
+      if (segment <= 0) {
+        return Path();
+      }
+    }
+
     final segmentsIterator = () sync* {
       var index = 0;
 
@@ -400,6 +396,7 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
     // ignore: dead_code
     while (true) {
+      // break;
       segmentsIterator.moveNext();
 
       path.relativeLineTo(segmentsIterator.current, 0);
@@ -407,6 +404,10 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
       currentDx += segmentsIterator.current;
 
       segmentsIterator.moveNext();
+
+      // if (currentDx + segmentsIterator.current >= size.width) {
+      //   break;
+      // }
 
       path.relativeMoveTo(segmentsIterator.current, 0);
       path.close();
@@ -471,9 +472,15 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
         break;
 
         case BorderUnitStyle.DASHED:
+          final dashSize = boxModel.borderBox.top * 3 / 2;
+
+          final dashCountAvailable = ((boxModel.borderBoxSize.width / dashSize) * 0.8).floorToDouble();
+
+          final dashGap = (boxModel.borderBoxSize.width - (dashCountAvailable * dashSize)) / (dashCountAvailable);
+
           final path = this.createDashedPath(
             context: context,
-            segments: [boxModel.borderBox.top * 3 / 2, boxModel.borderBox.top / 2],
+            segments: [dashSize, dashGap],
             offset: (offset + boxModel.borderBoxOffset).translate(0, boxModel.borderBox.top / 2),
             size: boxModel.borderBoxSize,
             borderRadius: boxModel.borderRadius,
@@ -807,8 +814,8 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
     final isMainAxisAutoSized = (
       FlexDirection.isVertical(this.style.flexDirection)
-        ? this.style.height == Unit.auto
-        : this.style.width == Unit.auto
+        ? (this.style.height == Unit.auto && boxParentData?.verticalFlexSize == null)
+        : (this.style.width == Unit.auto && boxParentData?.horizontalFlexSize == null)
     );
 
     var contentWidth = 0.0;
@@ -988,10 +995,10 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
         if (child.style.flexGrow > 0) {
           if (FlexDirection.isVertical(this.style.flexDirection)) {
-            childParentData.verticalFlexSize = availableSpaceInMainAxis * child.style.flexGrow / totalFlexGrow;
+            childParentData.verticalFlexSize = availableSpaceInMainAxis * child.style.flexGrow / Math.max(1, totalFlexGrow);
           }
           else {
-            childParentData.horizontalFlexSize = availableSpaceInMainAxis * child.style.flexGrow / totalFlexGrow;
+            childParentData.horizontalFlexSize = availableSpaceInMainAxis * child.style.flexGrow / Math.max(1, totalFlexGrow);
           }
         }
 

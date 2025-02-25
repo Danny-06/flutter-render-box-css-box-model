@@ -180,91 +180,95 @@ class MyAppState extends State<MyApp> {
                     ),
                     Box(
                       style: Style(
+                        alignSelf: ItemAlignment.STRETCH,
+                        // width: 1.pr,
                         flexDirection: FlexDirection.HORIZONTAL,
                         alignItems: ItemAlignment.CENTER,
                         backgroundColor: Colors.orange,
                         columnGap: 10.px,
                         padding: EdgeInsetsUnit.all(10.px),
+                        margin: EdgeInsetsUnit.symmetric(horizontal: 10.px),
                       ),
                       children: [
-                        Box(
-                          style: Style(
-                            boxSizing: BoxSizing.CONTENT_BOX,
-                            width: 80.px,
-                            height: 200.px,
-                            backgroundColor: Colors.purple,
-                            margin: EdgeInsetsUnit.only(
-                              top: (0).px,
-                              // left: (50).px,
-                            ),
-                            padding: EdgeInsetsUnit.only(
-                              top: 5.px,
-                              left: 5.px,
-                              right: 5.px,
-                              bottom: 5.px,
-                            ),
-                            rowGap: 5.px,
-                            flexDirection: FlexDirection.VERTICAL,
-                            alignItems: ItemAlignment.STRETCH,
-                            justifyContent: ContentAlignment.SPACE_EVENLY,
+                        // Box(
+                        //   style: Style(
+                        //     boxSizing: BoxSizing.CONTENT_BOX,
+                        //     width: 80.px,
+                        //     height: 200.px,
+                        //     backgroundColor: Colors.purple,
+                        //     margin: EdgeInsetsUnit.only(
+                        //       top: (0).px,
+                        //       // left: (50).px,
+                        //     ),
+                        //     padding: EdgeInsetsUnit.only(
+                        //       top: 5.px,
+                        //       left: 5.px,
+                        //       right: 5.px,
+                        //       bottom: 5.px,
+                        //     ),
+                        //     rowGap: 5.px,
+                        //     flexDirection: FlexDirection.VERTICAL,
+                        //     alignItems: ItemAlignment.STRETCH,
+                        //     justifyContent: ContentAlignment.SPACE_EVENLY,
 
-                            // borderRadius: BorderRadiusUnit.all(10.px),
-                            border: BorderEdgeInsetsUnit.only(
-                              leftSide: BorderSideUnit(
-                                style: BorderUnitStyle.SOLID,
-                                width: 30.px,
-                                color: Colors.white,
-                              ),
-                              topSide: BorderSideUnit(
-                                style: BorderUnitStyle.SOLID,
-                                width: 30.px,
-                                color: Colors.teal,
-                              ),
-                              rightSide: BorderSideUnit(
-                                style: BorderUnitStyle.SOLID,
-                                width: 20.px,
-                                color: Colors.yellow,
-                              ),
-                              bottomSide: BorderSideUnit(
-                                style: BorderUnitStyle.SOLID,
-                                width: 10.px,
-                                color: Colors.deepPurpleAccent,
-                              ),
-                            ),
-                            // columnGap: 10.px,
-                          ),
-                          children: [
-                            Box(
-                              style: Style(
-                                height: 20.px,
-                                backgroundColor: Colors.blue,
-                              ),
-                            ),
-                            Box(
-                              style: Style(
-                                flexGrow: 1,
-                                height: 20.px,
-                                backgroundColor: Colors.blue,
-                              ),
-                            ),
-                            Box(
-                              style: Style(
-                                height: 20.px,
-                                backgroundColor: Colors.blue,
-                              ),
-                            ),
-                            Box(
-                              style: Style(
-                                height: 20.px,
-                                backgroundColor: Colors.blue,
-                              ),
-                            ),
-                          ],
-                        ),
+                        //     // borderRadius: BorderRadiusUnit.all(10.px),
+                        //     border: BorderEdgeInsetsUnit.only(
+                        //       leftSide: BorderSideUnit(
+                        //         style: BorderUnitStyle.SOLID,
+                        //         width: 30.px,
+                        //         color: Colors.white,
+                        //       ),
+                        //       topSide: BorderSideUnit(
+                        //         style: BorderUnitStyle.SOLID,
+                        //         width: 30.px,
+                        //         color: Colors.teal,
+                        //       ),
+                        //       rightSide: BorderSideUnit(
+                        //         style: BorderUnitStyle.SOLID,
+                        //         width: 20.px,
+                        //         color: Colors.yellow,
+                        //       ),
+                        //       bottomSide: BorderSideUnit(
+                        //         style: BorderUnitStyle.SOLID,
+                        //         width: 10.px,
+                        //         color: Colors.deepPurpleAccent,
+                        //       ),
+                        //     ),
+                        //     // columnGap: 10.px,
+                        //   ),
+                        //   children: [
+                        //     Box(
+                        //       style: Style(
+                        //         height: 20.px,
+                        //         backgroundColor: Colors.blue,
+                        //       ),
+                        //     ),
+                        //     Box(
+                        //       style: Style(
+                        //         flexGrow: 1,
+                        //         height: 20.px,
+                        //         backgroundColor: Colors.blue,
+                        //       ),
+                        //     ),
+                        //     Box(
+                        //       style: Style(
+                        //         height: 20.px,
+                        //         backgroundColor: Colors.blue,
+                        //       ),
+                        //     ),
+                        //     Box(
+                        //       style: Style(
+                        //         height: 20.px,
+                        //         backgroundColor: Colors.blue,
+                        //       ),
+                        //     ),
+                        //   ],
+                        // ),
                         Box(
                           style: Style(
-                            boxSizing: BoxSizing.CONTENT_BOX,
-                            width: 80.px,
+                            flexGrow: 1,
+                            // boxSizing: BoxSizing.CONTENT_BOX,
+                            // width: 160.px,
                             height: 200.px,
                             backgroundColor: Colors.purple,
                             margin: EdgeInsetsUnit.only(
@@ -287,8 +291,8 @@ class MyAppState extends State<MyApp> {
 
                             border: BorderEdgeInsetsUnit.only(
                               leftSide: BorderSideUnit(
-                                style: BorderUnitStyle.DASHED,
-                                width: 30.px,
+                                style: BorderUnitStyle.SOLID,
+                                width: 10.px,
                                 color: Colors.white,
                               ),
                               topSide: BorderSideUnit(
@@ -297,8 +301,8 @@ class MyAppState extends State<MyApp> {
                                 color: Colors.teal,
                               ),
                               rightSide: BorderSideUnit(
-                                style: BorderUnitStyle.DASHED,
-                                width: 20.px,
+                                style: BorderUnitStyle.SOLID,
+                                width: 10.px,
                                 color: Colors.yellow,
                               ),
                               bottomSide: BorderSideUnit(
@@ -313,6 +317,7 @@ class MyAppState extends State<MyApp> {
                           children: [
                             Box(
                               style: Style(
+                                width: 1.pr,
                                 height: 20.px,
                                 backgroundColor: Colors.blue,
                               ),

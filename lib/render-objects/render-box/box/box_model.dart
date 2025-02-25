@@ -69,7 +69,7 @@ class BoxModel {
         );
 
         this.contentBox = Size(
-          this.borderBoxSize.width - this.paddingBox.horizontal,
+          this.borderBoxSize.width - this.borderBox.horizontal - this.paddingBox.horizontal,
           this.contentBox.height,
         );
       }
@@ -82,7 +82,7 @@ class BoxModel {
 
         this.contentBox = Size(
           this.contentBox.width,
-          this.borderBoxSize.height - this.paddingBox.vertical,
+          this.borderBoxSize.height - this.borderBox.vertical - this.paddingBox.vertical,
         );
       }
     }
@@ -96,7 +96,7 @@ class BoxModel {
 
         this.contentBox = Size(
           this.contentBox.width,
-          this.borderBoxSize.height - this.paddingBox.vertical,
+          this.borderBoxSize.height - this.borderBox.vertical - this.paddingBox.vertical,
         );
       }
 
@@ -107,7 +107,7 @@ class BoxModel {
         );
 
         this.contentBox = Size(
-          this.borderBoxSize.width - this.paddingBox.horizontal,
+          this.borderBoxSize.width - this.borderBox.horizontal - this.paddingBox.horizontal,
           this.contentBox.height,
         );
       }
@@ -182,6 +182,37 @@ class BoxModel {
   final EdgeInsets paddingBox;
 
   late Size contentBox;
+  
+  // fully implement copyWith
+  BoxModel copyWith({
+    BoxSizing? boxSizing,
+    double? width,
+    double? height,
+    double? contentWidth,
+    double? contentHeight,
+    EdgeInsets? margin,
+    BorderEdgeInsets? borderBox,
+    EdgeInsets? paddingBox,
+    Axis? direction,
+    double? horizontalFlexSize,
+    double? verticalFlexSize,
+    BorderRadius? borderRadius,
+  }) {
+    return BoxModel(
+      boxSizing: boxSizing ?? this.boxSizing,
+      width: width ?? this.width,
+      height: height ?? this.height,
+      contentWidth: contentWidth ?? this.contentWidth,
+      contentHeight: contentHeight ?? this.contentHeight,
+      margin: margin ?? this.margin,
+      borderBox: borderBox ?? this.borderBox,
+      paddingBox: paddingBox ?? this.paddingBox,
+      direction: direction ?? this.direction,
+      horizontalFlexSize: horizontalFlexSize ?? this.horizontalFlexSize,
+      verticalFlexSize: verticalFlexSize ?? this.verticalFlexSize,
+      borderRadius: borderRadius ?? this.borderRadius,
+    );
+  }
 
 }
 
