@@ -182,6 +182,9 @@ class MyAppState extends State<MyApp> {
                       style: Style(
                         flexDirection: FlexDirection.HORIZONTAL,
                         alignItems: ItemAlignment.CENTER,
+                        backgroundColor: Colors.orange,
+                        columnGap: 10.px,
+                        padding: EdgeInsetsUnit.all(10.px),
                       ),
                       children: [
                         Box(
@@ -204,13 +207,29 @@ class MyAppState extends State<MyApp> {
                             flexDirection: FlexDirection.VERTICAL,
                             alignItems: ItemAlignment.STRETCH,
                             justifyContent: ContentAlignment.SPACE_EVENLY,
+
                             // borderRadius: BorderRadiusUnit.all(10.px),
-                            border: BorderEdgeInsetsUnit.all(
-                              BorderSideUnit(
+                            border: BorderEdgeInsetsUnit.only(
+                              leftSide: BorderSideUnit(
                                 style: BorderUnitStyle.SOLID,
                                 width: 30.px,
                                 color: Colors.white,
-                              )
+                              ),
+                              topSide: BorderSideUnit(
+                                style: BorderUnitStyle.SOLID,
+                                width: 30.px,
+                                color: Colors.teal,
+                              ),
+                              rightSide: BorderSideUnit(
+                                style: BorderUnitStyle.SOLID,
+                                width: 20.px,
+                                color: Colors.yellow,
+                              ),
+                              bottomSide: BorderSideUnit(
+                                style: BorderUnitStyle.SOLID,
+                                width: 10.px,
+                                color: Colors.deepPurpleAccent,
+                              ),
                             ),
                             // columnGap: 10.px,
                           ),
@@ -262,7 +281,33 @@ class MyAppState extends State<MyApp> {
                             flexDirection: FlexDirection.VERTICAL,
                             alignItems: ItemAlignment.STRETCH,
                             justifyContent: ContentAlignment.SPACE_EVENLY,
-                            // borderRadius: BorderRadiusUnit.all(10.px),
+
+                            borderRadius: BorderRadiusUnit.all(10.px),
+                            // overflow: Overflow.HIDDEN,
+
+                            border: BorderEdgeInsetsUnit.only(
+                              leftSide: BorderSideUnit(
+                                style: BorderUnitStyle.DASHED,
+                                width: 30.px,
+                                color: Colors.white,
+                              ),
+                              topSide: BorderSideUnit(
+                                style: BorderUnitStyle.DASHED,
+                                width: 30.px,
+                                color: Colors.teal,
+                              ),
+                              rightSide: BorderSideUnit(
+                                style: BorderUnitStyle.DASHED,
+                                width: 20.px,
+                                color: Colors.yellow,
+                              ),
+                              bottomSide: BorderSideUnit(
+                                style: BorderUnitStyle.DASHED,
+                                width: 10.px,
+                                color: Colors.deepPurpleAccent,
+                              ),
+                            ),
+
                             // columnGap: 10.px,
                           ),
                           children: [

@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' hide BorderSide;
 import 'package:flutter/rendering.dart' hide BorderSide;
@@ -348,59 +346,234 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
       bottomRight: Radius.circular(this.resolveUnit(this.style.borderRadius.bottomRight)!),
     );
 
-    canvas.drawRRect(rRect, paint);
+    final borderRRect = RRect.fromRectAndCorners(
+      (offset + boxModel.borderBoxOffset) & boxModel.borderBoxSize,
+      topLeft: Radius.elliptical(rRect.tlRadiusX, rRect.tlRadiusY),
+      topRight: Radius.elliptical(rRect.trRadiusX, rRect.trRadiusY),
+      bottomLeft: Radius.elliptical(rRect.blRadiusX, rRect.blRadiusY),
+      bottomRight: Radius.elliptical(rRect.brRadiusX, rRect.brRadiusY),
+    );
 
-    if (this.style.overflow == Overflow.HIDDEN) {
-      canvas.clipRRect(rRect);
-    }
+    canvas.save();
+
+    canvas.clipRRect(borderRRect);
+    canvas.drawRect(rect, paint);
 
     if (this.style.border != null) {
-      final borderRRect = RRect.fromRectAndCorners(
-        (offset + boxModel.borderBoxOffset) & boxModel.borderBoxSize,
-        topLeft: Radius.elliptical(rRect.tlRadiusX, rRect.tlRadiusY),
-        topRight: Radius.elliptical(rRect.trRadiusX, rRect.trRadiusY),
-        bottomLeft: Radius.elliptical(rRect.blRadiusX, rRect.blRadiusY),
-        bottomRight: Radius.elliptical(rRect.brRadiusX, rRect.brRadiusY),
-      );
+      this.drawBorder(context, offset, borderRRect);
+    }
 
-      this.drawBorder(context, borderRRect);
+    canvas.restore();
+
+    if (this.style.overflow == Overflow.HIDDEN) {
+      canvas.clipRRect(borderRRect);
     }
 
     this.defaultPaint(context, offset + boxModel.contentBoxOffset);
   }
 
-  void drawBorder(PaintingContext context, RRect rRect) {
+  void drawBorder(PaintingContext context, Offset offset, RRect rRect) {
     final border = this.style.border;
 
     if (border == null) {
       return;
     }
 
+    final boxModel = this.boxModel!;
+
     final canvas = context.canvas;
 
-    final paint = Paint();
+    // TOP
 
-    paint.color = Colors.white;
-    paint.style = PaintingStyle.stroke;
-    paint.strokeWidth = this.resolveUnit(border.topSide.width)!;
+    if (boxModel.borderBox.top > 0) {
+      switch (border.topSide.style) {
 
-    () {
-      final path = Path();
+        case BorderUnitStyle.NONE:
+          
+        break;
 
-      path.moveTo(rRect.center.dx - rRect.width / 2 + paint.strokeWidth / 2, rRect.center.dy + rRect.height / 2);
-      path.lineTo(rRect.center.dx - rRect.width / 2 + paint.strokeWidth / 2, rRect.center.dy - rRect.height / 2);
+        case BorderUnitStyle.SOLID:
+          final paint = Paint();
 
-      canvas.drawPath(path, paint);
-    }();
+          paint.color = border.topSide.color;
+          paint.style = PaintingStyle.stroke;
+          paint.strokeWidth = boxModel.borderBox.top;
 
-    () {
-      final path = Path();
+          final path = Path();
 
-      path.moveTo(rRect.center.dx + rRect.width / 2 - paint.strokeWidth / 2, rRect.center.dy + rRect.height / 2);
-      path.lineTo(rRect.center.dx + rRect.width / 2 - paint.strokeWidth / 2, rRect.center.dy - rRect.height / 2);
+          path.moveTo(offset.dx + boxModel.paddingBoxOffset.dx - boxModel.borderBox.left, offset.dy + boxModel.paddingBoxOffset.dy - boxModel.borderBox.top / 2);
+          path.relativeLineTo(boxModel.borderBoxSize.width, 0);
 
-      canvas.drawPath(path, paint);
-    }();
+
+          final clipPath = Path();
+
+          clipPath.moveTo(offset.dx + boxModel.paddingBoxOffset.dx, offset.dy + boxModel.paddingBoxOffset.dy);
+          clipPath.relativeLineTo(boxModel.paddingBoxSize.width, 0);
+          clipPath.relativeLineTo(boxModel.borderBox.right, -boxModel.borderBox.top);
+          clipPath.relativeLineTo(-boxModel.borderBoxSize.width, 0);
+
+          canvas.save();
+
+          canvas.clipPath(clipPath);
+          canvas.drawPath(path, paint);
+
+          canvas.restore();
+        break;
+
+        case BorderUnitStyle.DASHED:
+          
+        break;
+
+        case BorderUnitStyle.DOTTED:
+          
+        break;
+
+      }
+    }
+
+    // LEFT
+
+    if (boxModel.borderBox.left > 0) {
+      switch (border.leftSide.style) {
+
+        case BorderUnitStyle.NONE:
+          
+        break;
+
+        case BorderUnitStyle.SOLID:
+          final paint = Paint();
+
+          paint.color = border.leftSide.color;
+          paint.style = PaintingStyle.stroke;
+          paint.strokeWidth = boxModel.borderBox.left;
+
+          final path = Path();
+
+          path.moveTo(offset.dx + boxModel.paddingBoxOffset.dx - boxModel.borderBox.left / 2, offset.dy + boxModel.paddingBoxOffset.dy - boxModel.borderBox.top);
+          path.relativeLineTo(0, boxModel.borderBoxSize.height);
+
+
+          final clipPath = Path();
+
+          clipPath.moveTo(offset.dx + boxModel.paddingBoxOffset.dx, offset.dy + boxModel.paddingBoxOffset.dy);
+          clipPath.relativeLineTo(0, boxModel.paddingBoxSize.height);
+          clipPath.relativeLineTo(-boxModel.borderBox.left, boxModel.borderBox.bottom);
+          clipPath.relativeLineTo(0, -boxModel.borderBoxSize.height);
+
+          canvas.save();
+
+          canvas.clipPath(clipPath);
+          canvas.drawPath(path, paint);
+
+          canvas.restore();
+        break;
+
+        case BorderUnitStyle.DASHED:
+          
+        break;
+
+        case BorderUnitStyle.DOTTED:
+          
+        break;
+
+      }
+    }
+
+    // BOTTOM
+
+    if (boxModel.borderBox.bottom > 0) {
+      switch (border.bottomSide.style) {
+
+        case BorderUnitStyle.NONE:
+          
+        break;
+
+        case BorderUnitStyle.SOLID:
+          final paint = Paint();
+
+          paint.color = border.bottomSide.color;
+          paint.style = PaintingStyle.stroke;
+          paint.strokeWidth = boxModel.borderBox.bottom;
+
+          final path = Path();
+
+          path.moveTo(offset.dx + boxModel.paddingBoxOffset.dx - boxModel.borderBox.left, offset.dy + boxModel.paddingBoxOffset.dy + boxModel.paddingBoxSize.height + boxModel.borderBox.bottom / 2);
+          path.relativeLineTo(boxModel.borderBoxSize.width, 0);
+
+
+          final clipPath = Path();
+
+          clipPath.moveTo(offset.dx + boxModel.paddingBoxOffset.dx, offset.dy + boxModel.paddingBoxOffset.dy + boxModel.paddingBoxSize.height);
+          clipPath.relativeLineTo(boxModel.paddingBoxSize.width, 0);
+          clipPath.relativeLineTo(boxModel.borderBox.right, boxModel.borderBox.bottom);
+          clipPath.relativeLineTo(-boxModel.borderBoxSize.width, 0);
+
+          canvas.save();
+
+          canvas.clipPath(clipPath);
+          canvas.drawPath(path, paint);
+
+          canvas.restore();
+        break;
+
+        case BorderUnitStyle.DASHED:
+          
+        break;
+
+        case BorderUnitStyle.DOTTED:
+          
+        break;
+
+      }
+    }
+
+    // RIGHT
+
+    if (boxModel.borderBox.right > 0) {
+      switch (border.rightSide.style) {
+
+        case BorderUnitStyle.NONE:
+          
+        break;
+
+        case BorderUnitStyle.SOLID:
+          final paint = Paint();
+
+          paint.color = border.rightSide.color;
+          paint.style = PaintingStyle.stroke;
+          paint.strokeWidth = boxModel.borderBox.right;
+
+          final path = Path();
+
+          path.moveTo(offset.dx + boxModel.paddingBoxOffset.dx + boxModel.paddingBoxSize.width + boxModel.borderBox.right / 2, offset.dy + boxModel.paddingBoxOffset.dy - boxModel.borderBox.top);
+          path.relativeLineTo(0, boxModel.borderBoxSize.height);
+
+
+          final clipPath = Path();
+
+          clipPath.moveTo(offset.dx + boxModel.paddingBoxOffset.dx + boxModel.paddingBoxSize.width, offset.dy + boxModel.paddingBoxOffset.dy);
+          clipPath.relativeLineTo(0, boxModel.paddingBoxSize.height);
+          clipPath.relativeLineTo(boxModel.borderBox.right, boxModel.borderBox.bottom);
+          clipPath.relativeLineTo(0, -boxModel.borderBoxSize.height);
+
+          canvas.save();
+
+          canvas.clipPath(clipPath);
+          canvas.drawPath(path, paint);
+
+          canvas.restore();
+        break;
+
+        case BorderUnitStyle.DASHED:
+          
+        break;
+
+        case BorderUnitStyle.DOTTED:
+          
+        break;
+
+      }
+    }
   }
 
   void drawBorderSide(PaintingContext context) {
