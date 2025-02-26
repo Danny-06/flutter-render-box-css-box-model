@@ -135,6 +135,11 @@ class BoxModel {
       this.contentBox.width + this.paddingBox.horizontal,
       this.contentBox.height + this.paddingBox.vertical,
     );
+
+    this.center = Offset(
+      this.contentBoxOffset.dx + this.contentBox.width / 2,
+      this.contentBoxOffset.dy + this.contentBox.height / 2,
+    );
   }
 
   final BoxSizing boxSizing;
@@ -182,6 +187,32 @@ class BoxModel {
   final EdgeInsets paddingBox;
 
   late Size contentBox;
+
+  late final Offset center;
+
+  RRect getBorderBoxRRect(Offset offset) {
+    final borderRRect = RRect.fromRectAndCorners(
+      (offset + this.borderBoxOffset) & this.borderBoxSize,
+      topLeft: this.borderRadius.topLeft,
+      topRight: this.borderRadius.topRight,
+      bottomLeft: this.borderRadius.bottomLeft,
+      bottomRight: this.borderRadius.bottomRight,
+    );
+
+    return borderRRect;
+  }
+
+  RRect getPaddingBoxRRect(Offset offset) {
+    final paddingRRect = RRect.fromRectAndCorners(
+      (offset + this.paddingBoxOffset) & this.paddingBoxSize,
+      topLeft: this.borderRadius.topLeft,
+      topRight: this.borderRadius.topRight,
+      bottomLeft: this.borderRadius.bottomLeft,
+      bottomRight: this.borderRadius.bottomRight,
+    );
+
+    return paddingRRect;
+  }
   
   // fully implement copyWith
   BoxModel copyWith({

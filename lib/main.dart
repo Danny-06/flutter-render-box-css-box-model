@@ -180,6 +180,40 @@ class MyAppState extends State<MyApp> {
                     ),
                     Box(
                       style: Style(
+                        boxSizing: BoxSizing.CONTENT_BOX,
+                        alignSelf: ItemAlignment.CENTER,
+                        width: 100.px,
+                        height: 100.px,
+                        backgroundColor: Colors.blue,
+                        // backgroundColor: Colors.blue.withAlpha(0),
+                        borderRadius: BorderRadiusUnit(
+                          topLeft: 30.px,
+                          topRight: 50.px,
+                          // bottomRight: 50.px,
+                          // bottomLeft: 50.px,
+                        ),
+                        border: BorderEdgeInsetsUnit.only(
+                          topSide: BorderSideUnit(
+                            width: 30.px,
+                            color: Colors.red,
+                          ),
+                          // leftSide: BorderSideUnit(
+                          //   width: 5.px,
+                          //   color: Colors.black,
+                          // ),
+                          // bottomSide: BorderSideUnit(
+                          //   width: 5.px,
+                          //   color: Colors.white,
+                          // ),
+                          // rightSide: BorderSideUnit(
+                          //   width: 30.px,
+                          //   color: Colors.yellow,
+                          // ),
+                        ),
+                      ),
+                    ),
+                    Box(
+                      style: Style(
                         alignSelf: ItemAlignment.STRETCH,
                         // width: 1.pr,
                         flexDirection: FlexDirection.HORIZONTAL,
@@ -211,28 +245,28 @@ class MyAppState extends State<MyApp> {
                             alignItems: ItemAlignment.STRETCH,
                             justifyContent: ContentAlignment.SPACE_EVENLY,
 
-                            // borderRadius: BorderRadiusUnit.all(10.px),
+                            borderRadius: BorderRadiusUnit.all(10.px),
                             border: BorderEdgeInsetsUnit.only(
-                              leftSide: BorderSideUnit(
-                                style: BorderUnitStyle.SOLID,
-                                width: 30.px,
-                                color: Colors.white,
-                              ),
+                              // leftSide: BorderSideUnit(
+                              //   style: BorderUnitStyle.SOLID,
+                              //   width: 30.px,
+                              //   color: Colors.white,
+                              // ),
                               topSide: BorderSideUnit(
                                 style: BorderUnitStyle.SOLID,
                                 width: 30.px,
                                 color: Colors.teal,
                               ),
-                              rightSide: BorderSideUnit(
-                                style: BorderUnitStyle.SOLID,
-                                width: 20.px,
-                                color: Colors.yellow,
-                              ),
-                              bottomSide: BorderSideUnit(
-                                style: BorderUnitStyle.SOLID,
-                                width: 10.px,
-                                color: Colors.deepPurpleAccent,
-                              ),
+                              // rightSide: BorderSideUnit(
+                              //   style: BorderUnitStyle.SOLID,
+                              //   width: 20.px,
+                              //   color: Colors.yellow,
+                              // ),
+                              // bottomSide: BorderSideUnit(
+                              //   style: BorderUnitStyle.SOLID,
+                              //   width: 10.px,
+                              //   color: Colors.deepPurpleAccent,
+                              // ),
                             ),
                             // columnGap: 10.px,
                           ),
@@ -291,7 +325,7 @@ class MyAppState extends State<MyApp> {
 
                             border: BorderEdgeInsetsUnit.only(
                               leftSide: BorderSideUnit(
-                                style: BorderUnitStyle.SOLID,
+                                style: BorderUnitStyle.DASHED,
                                 width: 10.px,
                                 color: Colors.white,
                               ),
@@ -301,7 +335,7 @@ class MyAppState extends State<MyApp> {
                                 color: Colors.teal,
                               ),
                               rightSide: BorderSideUnit(
-                                style: BorderUnitStyle.SOLID,
+                                style: BorderUnitStyle.DASHED,
                                 width: 10.px,
                                 color: Colors.yellow,
                               ),
