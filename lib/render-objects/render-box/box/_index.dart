@@ -29,6 +29,11 @@ class Box extends MultiChildRenderObjectWidget {
     );
   }
 
+  @override
+  void updateRenderObject(BuildContext context, covariant StyledRenderBox renderObject) {
+    renderObject.style = this.style ?? Style();
+  }
+
 }
 
 class BoxParentData extends ContainerBoxParentData<RenderBox> {
@@ -50,7 +55,7 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     this.style = const Style(),
   });
 
-  final Style style;
+  Style style;
 
   @override
   void debugAssertDoesMeetConstraints() {

@@ -1,6 +1,291 @@
 import 'package:flutter/material.dart' hide CrossAxisAlignment;
 import '/render-objects/render-box/box/box_model.dart';
 
+
+final $box = StyledBoxUtils();
+
+
+class StyledBoxUtils {
+
+  final boxSizing = BoxSizingUtils();
+
+  final margin = EdgeInsetUtils();
+
+  final border = BorderUtils();
+
+  final padding = EdgeInsetUtils();
+
+  final borderRadius = BorderRadiusUtils();
+
+  final flexDirection = FlexDirectionUtils();
+
+  final contentAlignment = ContentAlignmentUtils();
+
+  final itemAlignment = ItemAlignmentUtils();
+
+}
+
+
+class BoxSizingUtils {
+
+  BoxSizing get borderBox {
+    return BoxSizing.BORDER_BOX;
+  }
+
+  BoxSizing get contentBox {
+    return BoxSizing.CONTENT_BOX;
+  }
+
+}
+
+class EdgeInsetUtils {
+
+  EdgeInsetsUnit call(Unit value) {
+    return EdgeInsetsUnit.all(value);
+  }
+
+  EdgeInsetsUnit horizontal(Unit value) {
+    return EdgeInsetsUnit.horizontal(value);
+  }
+
+  EdgeInsetsUnit vertical(Unit value) {
+    return EdgeInsetsUnit.vertical(value);
+  }
+
+  EdgeInsetsUnit symmetric({
+    Unit horizontal = Unit.zero,
+    Unit vertical = Unit.zero,
+  }) {
+    return EdgeInsetsUnit.symmetric(
+      horizontal: horizontal,
+      vertical: vertical,
+    );
+  }
+
+  EdgeInsetsUnit only({
+    Unit top = Unit.zero,
+    Unit right = Unit.zero,
+    Unit bottom = Unit.zero,
+    Unit left = Unit.zero,
+  }) {
+    return EdgeInsetsUnit.only(
+      top: top,
+      right: right,
+      bottom: bottom,
+      left: left,
+    );
+  }
+
+  EdgeInsetsUnit top(Unit value) {
+    return EdgeInsetsUnit.only(top: value);
+  }
+
+  EdgeInsetsUnit left(Unit value) {
+    return EdgeInsetsUnit.only(left: value);
+  }
+
+  EdgeInsetsUnit bottom(Unit value) {
+    return EdgeInsetsUnit.only(bottom: value);
+  }
+
+  EdgeInsetsUnit right(Unit value) {
+    return EdgeInsetsUnit.only(right: value);
+  }
+
+}
+
+class BorderUtils {
+
+  BorderEdgeInsetsUnit call({
+    required Unit width,
+    BorderUnitStyle style = BorderUnitStyle.SOLID,
+    Color color = Colors.black,
+  }) {
+    return BorderEdgeInsetsUnit.all(
+      this.side(
+        width: width,
+        style: style,
+        color: color,
+      )
+    );
+  }
+
+  BorderSideUnit side({
+    required Unit width,
+    BorderUnitStyle style = BorderUnitStyle.SOLID,
+    Color color = Colors.black,
+  }) {
+    return BorderSideUnit(
+      style: style,
+      width: width,
+      color: color,
+    );
+  }
+
+  BorderEdgeInsetsUnit only({
+    BorderSideUnit? topSide,
+    BorderSideUnit? rightSide,
+    BorderSideUnit? bottomSide,
+    BorderSideUnit? leftSide,
+  }) {
+    return BorderEdgeInsetsUnit.only(
+      topSide: topSide ?? BorderSideUnit.none,
+      rightSide: rightSide ?? BorderSideUnit.none,
+      bottomSide: bottomSide ?? BorderSideUnit.none,
+      leftSide: leftSide ?? BorderSideUnit.none,
+    );
+  }
+
+  BorderEdgeInsetsUnit top({
+    required Unit width,
+    BorderUnitStyle style = BorderUnitStyle.SOLID,
+    Color color = Colors.black,
+  }) {
+    return this.only(
+      topSide: this.side(
+        style: style,
+        width: width,
+        color: color,
+      )
+    );
+  }
+
+  BorderEdgeInsetsUnit left({
+    required Unit width,
+    BorderUnitStyle style = BorderUnitStyle.SOLID,
+    Color color = Colors.black,
+  }) {
+    return this.only(
+      leftSide: this.side(
+        style: style,
+        width: width,
+        color: color,
+      )
+    );
+  }
+
+  BorderEdgeInsetsUnit bottom({
+    required Unit width,
+    BorderUnitStyle style = BorderUnitStyle.SOLID,
+    Color color = Colors.black,
+  }) {
+    return this.only(
+      bottomSide: this.side(
+        style: style,
+        width: width,
+        color: color,
+      )
+    );
+  }
+
+  BorderEdgeInsetsUnit right({
+    required Unit width,
+    BorderUnitStyle style = BorderUnitStyle.SOLID,
+    Color color = Colors.black,
+  }) {
+    return this.only(
+      rightSide: this.side(
+        style: style,
+        width: width,
+        color: color,
+      )
+    );
+  }
+
+}
+
+
+class BorderRadiusUtils {
+
+  BorderRadiusUnit call(Unit value) {
+    return BorderRadiusUnit.all(value);
+  }
+
+  BorderRadiusUnit only({
+    Unit topLeft = Unit.zero,
+    Unit topRight = Unit.zero,
+    Unit bottomRight = Unit.zero,
+    Unit bottomLeft = Unit.zero,
+  }) {
+    return BorderRadiusUnit(
+      topLeft: topLeft,
+      topRight: topRight,
+      bottomRight: bottomRight,
+      bottomLeft: bottomLeft,
+    );
+  }
+
+}
+
+class FlexDirectionUtils {
+
+  FlexDirection get vertical {
+    return FlexDirection.VERTICAL;
+  }
+
+  FlexDirection get verticalReverse {
+    return FlexDirection.VERTICAL_REVERSE;
+  }
+
+  FlexDirection get horizontal {
+    return FlexDirection.HORIZONTAL;
+  }
+
+  FlexDirection get horizontalReverse {
+    return FlexDirection.HORIZONTAL_REVERSE;
+  }
+
+}
+
+class ContentAlignmentUtils {
+
+  ContentAlignment get flexStart {
+    return ContentAlignment.FLEX_START;
+  }
+
+  ContentAlignment get flexEnd {
+    return ContentAlignment.FLEX_END;
+  }
+
+  ContentAlignment get center {
+    return ContentAlignment.CENTER;
+  }
+
+  ContentAlignment get spaceBetween {
+    return ContentAlignment.SPACE_BETWEEN;
+  }
+
+  ContentAlignment get spaceAround {
+    return ContentAlignment.SPACE_AROUND;
+  }
+
+  ContentAlignment get spaceEvenly {
+    return ContentAlignment.SPACE_EVENLY;
+  }
+
+}
+
+class ItemAlignmentUtils {
+
+  ItemAlignment get flexStart {
+    return ItemAlignment.FLEX_START;
+  }
+
+  ItemAlignment get flexEnd {
+    return ItemAlignment.FLEX_END;
+  }
+
+  ItemAlignment get center {
+    return ItemAlignment.CENTER;
+  }
+
+  ItemAlignment get stretch {
+    return ItemAlignment.STRETCH;
+  }
+
+}
+
+
 class Style {
 
   const Style({
