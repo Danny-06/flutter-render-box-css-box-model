@@ -15,6 +15,10 @@ class BoxModel {
     this.boxSizing = BoxSizing.BORDER_BOX,
     this.width,
     this.height,
+    this.minWidth = 0.0,
+    this.maxWidth = double.infinity,
+    this.minHeight = 0.0,
+    this.maxHeight = double.infinity,
     this.contentWidth,
     this.contentHeight,
     this.margin = const EdgeInsets.all(0),
@@ -40,8 +44,8 @@ class BoxModel {
 
     if (this.boxSizing == BoxSizing.CONTENT_BOX) {
       this.contentBox = Size(
-        width ?? contentWidth!,
-        height ?? contentHeight!,
+        (width ?? contentWidth!).clamp(this.minWidth, this.maxWidth),
+        (height ?? contentHeight!).clamp(this.minHeight, this.maxHeight),
       );
 
       this.borderBoxSize = Size(
@@ -51,8 +55,8 @@ class BoxModel {
     }
     else {
       this.borderBoxSize = Size(
-        width ?? (contentWidth! + this.paddingBox.horizontal + this.borderBox.horizontal),
-        height ?? (contentHeight! + this.paddingBox.vertical + this.borderBox.vertical),
+        (width ?? (contentWidth! + this.paddingBox.horizontal + this.borderBox.horizontal)).clamp(this.minWidth, this.maxWidth),
+        (height ?? (contentHeight! + this.paddingBox.vertical + this.borderBox.vertical)).clamp(this.minHeight, this.maxHeight),
       );
 
       this.contentBox = Size(
@@ -167,17 +171,23 @@ class BoxModel {
   final double? verticalFlexSize;
 
   /// Null means auto sized
+  /// Use [double.nan] to explicitly pass null in [BoxModel.copyWith]
   final double? width;
 
   /// Null means auto sized
+  /// Use [double.nan] to explicitly pass null in [BoxModel.copyWith]
   final double? height;
 
-  /// if [width] is non null this must be null
-  /// if [width] is null this must be non null
+  final double minWidth;
+
+  final double maxWidth;
+
+  final double minHeight;
+
+  final double maxHeight;
+
   final double? contentWidth;
 
-  /// if [height] is non null this must be null
-  /// if [height] is null this must be non null
   final double? contentHeight;
 
   final EdgeInsets margin;
@@ -219,6 +229,10 @@ class BoxModel {
     BoxSizing? boxSizing,
     double? width,
     double? height,
+    double? minWidth,
+    double? maxWidth,
+    double? minHeight,
+    double? maxHeight,
     double? contentWidth,
     double? contentHeight,
     EdgeInsets? margin,
@@ -231,8 +245,12 @@ class BoxModel {
   }) {
     return BoxModel(
       boxSizing: boxSizing ?? this.boxSizing,
-      width: width ?? this.width,
-      height: height ?? this.height,
+      width: (width?.isNaN == true) ? null : this.width,
+      height: (height?.isNaN == true) ? null : this.height,
+      minWidth: minWidth ?? this.minWidth,
+      maxWidth: maxWidth ?? this.maxWidth,
+      minHeight: minHeight ?? this.minHeight,
+      maxHeight: maxHeight ?? this.maxHeight,
       contentWidth: contentWidth ?? this.contentWidth,
       contentHeight: contentHeight ?? this.contentHeight,
       margin: margin ?? this.margin,
