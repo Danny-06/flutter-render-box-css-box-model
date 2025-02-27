@@ -200,6 +200,43 @@ class BoxModel {
 
   late final Offset center;
 
+  BoxConstraints getChildConstraints({
+    double parentMaxWidth = double.infinity,
+    double parentMaxHeight = double.infinity,
+  }) {
+    var maxWidth = 0.0;
+    var maxHeight = 0.0;
+
+    if (this.maxWidth.isFinite) {
+      maxWidth = this.maxWidth;
+    }
+    else
+    if (this.width != null) {
+      maxWidth = this.contentBox.width;
+    }
+    else {
+      maxWidth = parentMaxWidth;
+    }
+
+    if (this.maxHeight.isFinite) {
+      maxHeight = this.maxHeight;
+    }
+    else
+    if (this.height != null) {
+      maxHeight = this.contentBox.height;
+    }
+    else {
+      maxHeight = parentMaxHeight;
+    }
+
+    return BoxConstraints(
+      minWidth: 0.0,
+      maxWidth: maxWidth,
+      minHeight: 0.0,
+      maxHeight: maxHeight,
+    );
+  }
+
   RRect getBorderBoxRRect(Offset offset) {
     final borderRRect = RRect.fromRectAndCorners(
       (offset + this.borderBoxOffset) & this.borderBoxSize,

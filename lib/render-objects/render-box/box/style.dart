@@ -289,7 +289,9 @@ class ItemAlignmentUtils {
 class Style {
 
   const Style({
-    this.expandChild = false,
+    this.name,
+    this.expandChildHorizontal = false,
+    this.expandChildVertical = false,
     this.boxSizing = BoxSizing.BORDER_BOX,
     this.margin,
     this.border,
@@ -318,7 +320,11 @@ class Style {
     this.columnGap = Unit.zero,
   });
 
-  final bool expandChild;
+  final String? name;
+
+  final bool expandChildHorizontal;
+
+  final bool expandChildVertical;
 
   final BoxSizing boxSizing;
 
@@ -372,8 +378,66 @@ class Style {
 
   final Unit columnGap;
 
-  Style merge() {
-    return Style();
+  Style copyWith({
+    String? name,
+    bool? expandChildHorizontal,
+    bool? expandChildVertical,
+    BoxSizing? boxSizing,
+    EdgeInsetsUnit? margin,
+    BorderEdgeInsetsUnit? border,
+    BorderRadiusUnit? borderRadius,
+    EdgeInsetsUnit? padding,
+    Unit? width,
+    Unit? minWidth,
+    Unit? maxWidth,
+    Unit? height,
+    Unit? minHeight,
+    Unit? maxHeight,
+    Color? backgroundColor,
+    Color? color,
+    Overflow? overflow,
+    double? opacity,
+    double? flexGrow,
+    double? flexShrink,
+    FlexDirection? flexDirection,
+    ContentAlignment? justifyContent,
+    ContentAlignment? alignContent,
+    ItemAlignment? alignItems,
+    ItemAlignment? alignSelf,
+    FlexWrap? flexWrap,
+    Unit? rowGap,
+    Unit? columnGap,
+  }) {
+    return Style(
+      name: name ?? this.name,
+      expandChildHorizontal: expandChildHorizontal ?? this.expandChildHorizontal,
+      expandChildVertical: expandChildVertical ?? this.expandChildVertical,
+      boxSizing: boxSizing ?? this.boxSizing,
+      margin: margin ?? this.margin,
+      border: border ?? this.border,
+      borderRadius: borderRadius ?? this.borderRadius,
+      padding: padding ?? this.padding,
+      width: width ?? this.width,
+      minWidth: minWidth ?? this.minWidth,
+      maxWidth: maxWidth ?? this.maxWidth,
+      height: height ?? this.height,
+      minHeight: minHeight ?? this.minHeight,
+      maxHeight: maxHeight ?? this.maxHeight,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      color: color ?? this.color,
+      overflow: overflow ?? this.overflow,
+      opacity: opacity ?? this.opacity,
+      flexGrow: flexGrow ?? this.flexGrow,
+      flexShrink: flexShrink ?? this.flexShrink,
+      flexDirection: flexDirection ?? this.flexDirection,
+      justifyContent: justifyContent ?? this.justifyContent,
+      alignContent: alignContent ?? this.alignContent,
+      alignItems: alignItems ?? this.alignItems,
+      alignSelf: alignSelf ?? this.alignSelf,
+      flexWrap: flexWrap ?? this.flexWrap,
+      rowGap: rowGap ?? this.rowGap,
+      columnGap: columnGap ?? this.columnGap,
+    );
   }
 
 }

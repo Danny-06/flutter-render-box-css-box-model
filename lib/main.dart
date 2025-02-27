@@ -56,7 +56,8 @@ class MyAppState extends State<MyApp> {
                 right: 10.px,
                 bottom: 10.px,
               ),
-              expandChild: true,
+              expandChildHorizontal: true,
+              expandChildVertical: true,
             ),
             children: [
               SingleChildScrollView(
