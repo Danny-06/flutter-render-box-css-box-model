@@ -25,10 +25,12 @@ class Box extends MultiChildRenderObjectWidget {
 
   @override
   RenderBox createRenderObject(BuildContext context) {
-    return StyledRenderBox(
+    final renderObject = StyledRenderBox(
       name: this.name,
       style: this.style ?? const Style(),
     );
+
+    return renderObject;
   }
 
   @override
@@ -42,18 +44,8 @@ class Box extends MultiChildRenderObjectWidget {
     ;
   }
 
-  // MultiChildRenderObjectElement? _element;
-
-  // @override
-  // MultiChildRenderObjectElement createElement() {
-  //   final element = super.createElement();
-
-  //   this._element = element;
-
-  //   return element;
-  // }
-
 }
+
 
 class StyledRenderBoxParentData extends ContainerBoxParentData<RenderBox> {
 
@@ -989,7 +981,7 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
       childParentData.offset = Offset(0, 0);
 
-      return (child.size.width, 0);
+      return (0, child.size.height);
     }
     else
     if (this.style.expandChildVertical) {
@@ -1011,7 +1003,7 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
       childParentData.offset = Offset(0, 0);
 
-      return (0, child.size.height);
+      return (child.size.width, 0);
     }
 
     final childrenIterable = (
@@ -1344,9 +1336,9 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
               case FlexDirection.VERTICAL:
                 var translationValue = boxModel.contentBox.height - contentHeight;
 
-                if (this.computedHeight == null) {
-                  translationValue = this.computedMinHeight - contentHeight;
-                }
+                // if (boxModel.height == null && boxModel.minHeight > 0) {
+                //   translationValue = boxModel.minHeight - contentHeight;
+                // }
 
                 for (final (child, _) in childrenIterable) {
                   final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
@@ -1360,7 +1352,11 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
               break;
 
               case FlexDirection.HORIZONTAL:
-                final translationValue = boxModel.contentBox.width - contentWidth;
+                var translationValue = boxModel.contentBox.width - contentWidth;
+
+                // if (boxModel.width == null && boxModel.minWidth > 0) {
+                //   translationValue = boxModel.minWidth - contentWidth;
+                // }
 
                 for (final (child, _) in childrenIterable) {
                   final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
