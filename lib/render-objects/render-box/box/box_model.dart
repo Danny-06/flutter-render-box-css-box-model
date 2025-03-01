@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as Math;
 
 
 enum BoxSizing {
@@ -68,7 +69,7 @@ class BoxModel {
     if (this.direction == Axis.vertical) {
       if (this.horizontalFlexSize != null && this.width == null) {
         this.borderBoxSize = Size(
-          this.horizontalFlexSize! - this.margin.horizontal,
+          Math.max(this.contentWidth ?? 0, this.horizontalFlexSize! - this.margin.horizontal),
           this.borderBoxSize.height,
         );
 
@@ -81,7 +82,7 @@ class BoxModel {
       if (this.verticalFlexSize != null) {
         this.borderBoxSize = Size(
           this.borderBoxSize.width,
-          this.verticalFlexSize! - this.margin.horizontal,
+          Math.max(this.contentHeight ?? 0, this.verticalFlexSize! - this.margin.vertical),
         );
 
         this.contentBox = Size(

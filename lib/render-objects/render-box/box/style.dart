@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart' hide CrossAxisAlignment;
-import '/render-objects/render-box/box/box_model.dart';
+import './box_model.dart';
 
 
 final $box = StyledBoxUtils();
@@ -22,6 +22,10 @@ class StyledBoxUtils {
   final contentAlignment = ContentAlignmentUtils();
 
   final itemAlignment = ItemAlignmentUtils();
+
+  final overflow = OverflowUtils();
+
+  final boxShadow = BoxShadowUtils();
 
 }
 
@@ -285,6 +289,38 @@ class ItemAlignmentUtils {
 
 }
 
+class OverflowUtils {
+
+  Overflow get visible {
+    return Overflow.VISIBLE;
+  }
+
+  Overflow get hidden {
+    return Overflow.HIDDEN;
+  }
+
+}
+
+class BoxShadowUtils {
+
+  call({
+    Offset offset = Offset.zero,
+    Color color = Colors.black,
+    BlurStyle blurStyle = BlurStyle.outer,
+    double blurRadius = 0.0,
+    double spreadRadius = 0.0,
+  }) {
+    return BoxShadowStyle(
+      offset: offset,
+      color: color,
+      blurStyle: blurStyle,
+      blurRadius: blurRadius,
+      spreadRadius: spreadRadius,
+    );
+  }
+
+}
+
 
 class Style {
 
@@ -297,6 +333,8 @@ class Style {
     this.border,
     this.borderRadius = BorderRadiusUnit.zero,
     this.padding,
+    this.outline,
+    this.aspectRatio,
     this.width = Unit.auto,
     this.minWidth,
     this.maxWidth,
@@ -307,6 +345,7 @@ class Style {
     this.color,
     this.overflow = Overflow.VISIBLE,
     this.opacity = 1,
+    this.boxShadow,
 
     this.alignSelf,
     this.flexGrow = 0,
@@ -316,8 +355,8 @@ class Style {
     this.alignContent = ContentAlignment.FLEX_START,
     this.alignItems = ItemAlignment.FLEX_START,
     this.flexWrap = FlexWrap.NOWRAP,
-    this.rowGap = Unit.zero,
-    this.columnGap = Unit.zero,
+    this.verticalGap = Unit.zero,
+    this.horizontalGap = Unit.zero,
   });
 
   final String? name;
@@ -335,6 +374,10 @@ class Style {
   final BorderRadiusUnit borderRadius;
 
   final EdgeInsetsUnit? padding;
+
+  final BorderEdgeInsetsUnit? outline;
+
+  final double? aspectRatio;
 
   final Unit width;
 
@@ -356,6 +399,8 @@ class Style {
 
   final double opacity;
 
+  final BoxShadowStyle? boxShadow;
+
   // FlexBox
 
   final double flexGrow;
@@ -374,9 +419,9 @@ class Style {
 
   final FlexWrap flexWrap;
 
-  final Unit rowGap;
+  final Unit verticalGap;
 
-  final Unit columnGap;
+  final Unit horizontalGap;
 
   Style copyWith({
     String? name,
@@ -405,8 +450,8 @@ class Style {
     ItemAlignment? alignItems,
     ItemAlignment? alignSelf,
     FlexWrap? flexWrap,
-    Unit? rowGap,
-    Unit? columnGap,
+    Unit? verticalGap,
+    Unit? horizontalGap,
   }) {
     return Style(
       name: name ?? this.name,
@@ -435,13 +480,34 @@ class Style {
       alignItems: alignItems ?? this.alignItems,
       alignSelf: alignSelf ?? this.alignSelf,
       flexWrap: flexWrap ?? this.flexWrap,
-      rowGap: rowGap ?? this.rowGap,
-      columnGap: columnGap ?? this.columnGap,
+      verticalGap: verticalGap ?? this.verticalGap,
+      horizontalGap: horizontalGap ?? this.horizontalGap,
     );
   }
 
 }
 
+class BoxShadowStyle {
+
+  const BoxShadowStyle({
+    this.offset = Offset.zero,
+    this.color = Colors.black,
+    this.blurStyle = BlurStyle.outer,
+    this.blurRadius = 0.0,
+    this.spreadRadius = 0.0,
+  });
+
+  final Offset offset;
+
+  final Color color;
+
+  final BlurStyle blurStyle;
+
+  final double blurRadius;
+
+  final double spreadRadius;
+
+}
 
 enum Overflow {
 
@@ -475,6 +541,13 @@ enum FlexDirection {
     return [
       FlexDirection.VERTICAL,
       FlexDirection.VERTICAL_REVERSE,
+    ].contains(direction);
+  }
+
+  static isHorizontal(FlexDirection direction) {
+    return [
+      FlexDirection.HORIZONTAL,
+      FlexDirection.HORIZONTAL_REVERSE,
     ].contains(direction);
   }
 
@@ -543,10 +616,15 @@ enum UnitType {
 
   PX,
 
-  FR,
+  // FR,
 
   // Containing Block Size
   PR,
+
+  // Relative to own box size
+  // Obviously cannot be used in width and height
+  // Box Model
+  BM,
 
   /// Container Size
   CQ,
@@ -568,9 +646,9 @@ extension UnitTypeExtension on num {
     return this.toUnit(unit: UnitType.PX);
   }
 
-  Unit get fr {
-    return this.toUnit(unit: UnitType.FR);
-  }
+  // Unit get fr {
+  //   return this.toUnit(unit: UnitType.FR);
+  // }
 
   Unit get pr {
     return this.toUnit(unit: UnitType.PR);

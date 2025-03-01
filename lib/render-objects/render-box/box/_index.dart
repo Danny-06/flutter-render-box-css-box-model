@@ -10,6 +10,10 @@ import '/render-objects/render-box/box/style.dart';
 import '/render-objects/render-box/box/box_model.dart';
 
 
+// TODO: Check justityContent values: SpaceAround, SpaceBetween, SpaceEvenly
+// NOTE: If parent is a scroller, the box wont update its size if the scroller size changes (not sure how to fix it)
+
+
 class Box extends MultiChildRenderObjectWidget {
 
   const Box({
@@ -38,7 +42,7 @@ class Box extends MultiChildRenderObjectWidget {
     renderObject.style = this.style ?? Style();
 
     // This somehow fixes hot reload not updating layout properly
-    renderObject.parentData
+    renderObject.styledParentData
       ?..horizontalFlexSize = null
       ..verticalFlexSize = null
     ;
@@ -47,6 +51,7 @@ class Box extends MultiChildRenderObjectWidget {
 }
 
 
+// class StyledRenderBoxParentData extends MultiChildLayoutParentData {
 class StyledRenderBoxParentData extends ContainerBoxParentData<RenderBox> {
 
   StyledRenderBoxParentData();
@@ -95,7 +100,7 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
     this._style = value;
 
-    // this.markNeedsLayout();
+    this.markNeedsLayout();
   }
 
   @override
@@ -111,30 +116,42 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
   //   return super.markParentNeedsLayout();
   // }
 
-  StyledRenderBoxParentData? _parentData;
+  StyledRenderBoxParentData? _styledParentData;
 
-  StyledRenderBoxParentData? get parentData {
+  StyledRenderBoxParentData? get styledParentData {
+    return this._styledParentData;
+  }
+
+  ParentData? _parentData;
+
+  ParentData? get parentData {
     return this._parentData;
   }
 
-  void set parentData(ParentData? value) {
-    if (value == null) {
-      this._parentData = null;
-      return;
-    }
+  void set parentData(ParentData? parentData) {
+    this._parentData = parentData;
 
-    if (value is BoxParentData) {
-      this._parentData = (
+    if (parentData is StyledRenderBoxParentData?) {
+      this._styledParentData = parentData;
+    }
+    else
+    if (parentData is ContainerBoxParentData<RenderBox>) {
+      this._styledParentData = (
         StyledRenderBoxParentData()
-          ..offset = value.offset
+          ..offset = parentData.offset
+          ..previousSibling = parentData.previousSibling
+          ..nextSibling = parentData.nextSibling
       );
     }
     else
-    if (value is StyledRenderBoxParentData) {
-      this._parentData = value;
+    if (parentData is BoxParentData) {
+      this._styledParentData = (
+        StyledRenderBoxParentData()
+          ..offset = parentData.offset
+      );
     }
     else {
-      this._parentData = StyledRenderBoxParentData();
+      this._styledParentData = StyledRenderBoxParentData();
     }
   }
 
@@ -232,16 +249,6 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     );
   }
 
-  StyledRenderBoxParentData? get boxParentData {
-    final parentData = this.parentData;
-
-    if (parentData is StyledRenderBoxParentData) {
-      return parentData;
-    }
-
-    return null;
-  }
-
   BoxModel? boxModel;
 
   BoxModel? get parentBoxModel {
@@ -280,6 +287,11 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
   }
 
   bool _skipDryLayout = false;
+
+  // @override
+  // void layout(Constraints constraints, {bool parentUsesSize = false}) {
+  //   super.layout(constraints, parentUsesSize: parentUsesSize);
+  // }
 
   @override
   Size computeDryLayout(covariant BoxConstraints constraints) {
@@ -480,14 +492,31 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     //   bottomRight: Radius.elliptical(rRect.brRadiusX, rRect.brRadiusY),
     // );
 
-    canvas.drawRRect(backgroundRRect, paint);
+    if (this.style.boxShadow?.blurStyle == BlurStyle.inner) {
+      canvas.drawRRect(backgroundRRect, paint);
+
+      this.drawBoxShadow(
+        context: context,
+        borderRRect: borderRRect,
+      );
+    }
+    else {
+      this.drawBoxShadow(
+        context: context,
+        borderRRect: borderRRect,
+      );
+
+      canvas.drawRRect(backgroundRRect, paint);
+    }
 
     if (this.style.border != null) {
       this.drawBorder(context, offset, borderRRect);
     }
 
     if (this.style.overflow == Overflow.HIDDEN) {
+      canvas.save();
       canvas.clipRRect(borderRRect);
+      canvas.restore();
     }
 
     this.defaultPaint(context, offset + boxModel.contentBoxOffset);
@@ -554,6 +583,39 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     return path;
   }
 
+  void drawBoxShadow({
+    required PaintingContext context,
+    required RRect borderRRect,
+  }) {
+    if (this.style.boxShadow != null) block: {
+      final boxShadow = this.style.boxShadow!;
+
+      if (boxShadow.blurRadius == 0 || boxShadow.color == Colors.transparent) {
+        break block;
+      }
+
+      final canvas = context.canvas;
+
+      final boxShadowPaint = (
+        Paint()
+          ..color = boxShadow.color
+          ..maskFilter = MaskFilter.blur(boxShadow.blurStyle, boxShadow.blurRadius)
+      );
+
+      canvas.save();
+
+      canvas.translate(boxShadow.offset.dx, boxShadow.offset.dy);
+
+      canvas.drawDRRect(
+        borderRRect.inflate(boxShadow.spreadRadius),
+        boxShadow.blurStyle == BlurStyle.inner ? borderRRect.deflate(boxShadow.blurRadius) : RRect.zero,
+        boxShadowPaint,
+      );
+
+      canvas.restore();
+    }
+  }
+
   void drawBorder(PaintingContext context, Offset offset, RRect rRect) {
     final border = this.style.border;
 
@@ -589,7 +651,7 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
       switch (border.topSide.style) {
 
         case BorderUnitStyle.NONE:
-          // 
+          //
         break;
 
         case BorderUnitStyle.SOLID:
@@ -647,7 +709,7 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
         break;
 
         case BorderUnitStyle.DOTTED:
-          
+
         break;
 
       }
@@ -669,7 +731,7 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
       switch (border.leftSide.style) {
 
         case BorderUnitStyle.NONE:
-          // 
+          //
         break;
 
         case BorderUnitStyle.SOLID:
@@ -697,11 +759,11 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
         break;
 
         case BorderUnitStyle.DASHED:
-          
+
         break;
 
         case BorderUnitStyle.DOTTED:
-          
+
         break;
 
       }
@@ -723,7 +785,7 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
       switch (border.bottomSide.style) {
 
         case BorderUnitStyle.NONE:
-          // 
+          //
         break;
 
         case BorderUnitStyle.SOLID:
@@ -751,11 +813,11 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
         break;
 
         case BorderUnitStyle.DASHED:
-          
+
         break;
 
         case BorderUnitStyle.DOTTED:
-          
+
         break;
 
       }
@@ -777,7 +839,7 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
       switch (border.rightSide.style) {
 
         case BorderUnitStyle.NONE:
-          // 
+          //
         break;
 
         case BorderUnitStyle.SOLID:
@@ -805,11 +867,11 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
         break;
 
         case BorderUnitStyle.DASHED:
-          
+
         break;
 
         case BorderUnitStyle.DOTTED:
-          
+
         break;
 
       }
@@ -925,12 +987,12 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
   }
 
   (double contentWidth, double contentHeight) flexLayout({required isAutoSizedByContent, required bool isDry}) {
-    final boxModel = this.boxModel!;
+    var boxModel = this.boxModel!;
 
     final isMainAxisAutoSized = (
       FlexDirection.isVertical(this.style.flexDirection)
-        ? (this.style.height == Unit.auto && boxParentData?.verticalFlexSize == null)
-        : (this.style.width == Unit.auto && boxParentData?.horizontalFlexSize == null)
+        ? (boxModel.width == null && this.styledParentData?.verticalFlexSize == null && boxModel.contentBox.height == 0)
+        : (boxModel.height == null && this.styledParentData?.horizontalFlexSize == null && boxModel.contentBox.width == 0)
     );
 
     final childConstraints = boxModel.getChildConstraints(
@@ -975,13 +1037,16 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
         maxHeight: childConstraints.maxHeight,
       );
 
-      child.layout(singleChildConstraints, parentUsesSize: true);
+      // Avoid relayout boundary error when using `flexGrow` on parent
+      final childSize = child.getDryLayout(singleChildConstraints);
+
+      child.layout(singleChildConstraints);
 
       final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
 
       childParentData.offset = Offset(0, 0);
 
-      return (0, child.size.height);
+      return (0, childSize.height);
     }
     else
     if (this.style.expandChildVertical) {
@@ -997,13 +1062,16 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
         minHeight: boxModel.contentBox.height,
       );
 
-      child.layout(singleChildConstraints, parentUsesSize: true);
+      // Avoid relayout boundary error when using `flexGrow` on parent
+      final childSize = child.getDryLayout(singleChildConstraints);
+
+      child.layout(singleChildConstraints);
 
       final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
 
       childParentData.offset = Offset(0, 0);
 
-      return (child.size.width, 0);
+      return (childSize.width, 0);
     }
 
     final childrenIterable = (
@@ -1012,14 +1080,14 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
         : this.childrenIterator()
     );
 
-    final rowGap = this.resolveUnit(this.style.rowGap, direction: Axis.vertical) ?? 0;
-    final columnGap = this.resolveUnit(this.style.columnGap, direction: Axis.vertical) ?? 0;
+    final verticalGap = this.resolveUnit(this.style.verticalGap, direction: Axis.vertical) ?? 0;
+    final horizontalGap = this.resolveUnit(this.style.horizontalGap, direction: Axis.vertical) ?? 0;
 
     var contentWidth = 0.0;
     var contentHeight = 0.0;
 
-    var flexGrowContentWidth = 0.0;
-    var flexGrowContentHeight = 0.0;
+    var flexGrowChildContentWidth = 0.0;
+    var flexGrowChildContentHeight = 0.0;
 
     var maxChildWidth = 0.0;
     var maxChildHeight = 0.0;
@@ -1030,8 +1098,8 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
     var totalFlexGrow = 0.0;
 
     final hasSize = (
-      FlexDirection.isVertical(this.style.flexDirection) && (this.style.width != Unit.auto || this.boxParentData?.horizontalFlexSize != null)
-      || !FlexDirection.isVertical(this.style.flexDirection) && (this.style.height != Unit.auto || this.boxParentData?.verticalFlexSize != null)
+      FlexDirection.isVertical(this.style.flexDirection) && (this.style.width != Unit.auto || this.styledParentData?.horizontalFlexSize != null)
+      || !FlexDirection.isVertical(this.style.flexDirection) && (this.style.height != Unit.auto || this.styledParentData?.verticalFlexSize != null)
     );
 
     final hasMainAxisMinimunSize = (
@@ -1080,7 +1148,14 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
       }
       else {
         if (child is StyledRenderBox && child.style.flexGrow > 0) {
-          childSize = child.getDryLayout(childConstraints);
+          try {
+            child.layout(constraints, parentUsesSize: true);
+
+            childSize = child.size;
+          }
+          catch (reason) {
+            childSize = child.getDryLayout(childConstraints);
+          }
         }
         else {
           child.layout(
@@ -1146,44 +1221,49 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
       maxChildHeight = Math.max(maxChildHeight, childSize.height);
 
       if (FlexDirection.isVertical(this.style.flexDirection)) {
-        contentHeight += childSize.height + rowGap;
-        totalDy += childSize.height + rowGap;
+        contentHeight += childSize.height + verticalGap;
+        totalDy += childSize.height + verticalGap;
 
         if (child is StyledRenderBox && child.style.flexGrow > 0) {
-          flexGrowContentHeight += childSize.height;
+          flexGrowChildContentHeight += childSize.height;
         }
       }
       else {
-        contentWidth += childSize.width + columnGap;
-        totalDx += childSize.width + columnGap;
+        contentWidth += childSize.width + horizontalGap;
+        totalDx += childSize.width + horizontalGap;
 
         if (child is StyledRenderBox && child.style.flexGrow > 0) {
-          flexGrowContentWidth += childSize.width;
+          flexGrowChildContentWidth += childSize.width;
         }
       }
     }
 
-    totalDx -= columnGap;
-    totalDy -= rowGap;
+    totalDx -= horizontalGap;
+    totalDy -= verticalGap;
 
     if (FlexDirection.isVertical(this.style.flexDirection)) {
-      contentHeight -= rowGap;
+      contentHeight -= verticalGap;
       contentWidth = maxChildWidth;
     }
     else {
-      contentWidth -= columnGap;
+      contentWidth -= horizontalGap;
       contentHeight = maxChildHeight;
     }
 
     final availableSpaceInMainAxis = (
       FlexDirection.isVertical(this.style.flexDirection)
-        ? boxModel.contentBox.height - (contentHeight - flexGrowContentHeight)
-        : boxModel.contentBox.width - (contentWidth - flexGrowContentWidth)
+        ? boxModel.contentBox.height - (contentHeight - flexGrowChildContentHeight)
+        : boxModel.contentBox.width - (contentWidth - flexGrowChildContentWidth)
     );
 
     if (!isDry) {
-      var totalDx = 0.0;
-      var totalDy = 0.0;
+      // This first loop is to handle the flexGrow children that can affect the size of their parent
+
+      contentWidth = 0.0;
+      contentHeight = 0.0;
+
+      flexGrowChildContentWidth = 0.0;
+      flexGrowChildContentHeight = 0.0;
 
       for (final (child, _) in childrenIterable) {
         final childParentData = child.parentData;
@@ -1192,26 +1272,7 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
           continue;
         }
 
-        if (child is! StyledRenderBox) {
-          child.layout(childConstraints, parentUsesSize: true);
-
-          if (FlexDirection.isVertical(this.style.flexDirection)) {
-            childParentData.offset = Offset(childParentData.offset.dx, totalDy);
-            totalDy += child.size.height + rowGap;
-          }
-          else {
-            childParentData.offset = Offset(totalDx, childParentData.offset.dy);
-            totalDx += child.size.width + columnGap;
-          }
-
-          continue;
-        }
-
-        if (childParentData is! StyledRenderBoxParentData) {
-          continue;
-        }
-
-        if (availableSpaceInMainAxis >= 0 && child.style.flexGrow > 0) {
+        if (child is StyledRenderBox && childParentData is StyledRenderBoxParentData && availableSpaceInMainAxis >= 0 && child.style.flexGrow > 0) {
           if (FlexDirection.isVertical(this.style.flexDirection)) {
             childParentData.verticalFlexSize = availableSpaceInMainAxis * child.style.flexGrow / Math.max(1, totalFlexGrow);
           }
@@ -1225,16 +1286,62 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
         final childSize = child.size;
 
         if (FlexDirection.isVertical(this.style.flexDirection)) {
+          contentHeight += childSize.height + verticalGap;
+
+          if (child is StyledRenderBox && (child.style.flexGrow > 0 && childParentData is StyledRenderBoxParentData && childSize.height <= (childParentData.verticalFlexSize ?? 0))) {
+            flexGrowChildContentHeight += childSize.height;
+          }
+        }
+        else {
+          contentWidth += childSize.width + horizontalGap;
+
+          if (child is StyledRenderBox && (child.style.flexGrow > 0 && childParentData is StyledRenderBoxParentData && childSize.width <= (childParentData.horizontalFlexSize ?? 0))) {
+            flexGrowChildContentWidth += childSize.width;
+          }
+        }
+      }
+
+      if (FlexDirection.isVertical(this.style.flexDirection)) {
+        contentHeight -= verticalGap;
+        contentWidth = maxChildWidth;
+      }
+      else {
+        contentWidth -= horizontalGap;
+        contentHeight = maxChildHeight;
+      }
+
+      this.boxModel = this.boxModel!.copyWith(
+        contentWidth: contentWidth,
+        contentHeight: contentHeight,
+      );
+
+      boxModel = this.boxModel!;
+
+      var totalDx = 0.0;
+      var totalDy = 0.0;
+
+      for (final (child, _) in childrenIterable) {
+        final childParentData = child.parentData;
+
+        if (childParentData is! BoxParentData) {
+          continue;
+        }
+
+        child.layout(childConstraints, parentUsesSize: true);
+
+        final childSize = child.size;
+
+        if (FlexDirection.isVertical(this.style.flexDirection)) {
           childParentData.offset = Offset(childParentData.offset.dx, totalDy);
-          totalDy += child.size.height + rowGap;
+          totalDy += childSize.height + verticalGap;
         }
         else {
           childParentData.offset = Offset(totalDx, childParentData.offset.dy);
-          totalDx += child.size.width + columnGap;
+          totalDx += childSize.width + horizontalGap;
         }
 
         final itemAlignment = () {
-          if (child.style.alignSelf != null) {
+          if (child is StyledRenderBox && child.style.alignSelf != null) {
             return child.style.alignSelf!;
           }
           else {
@@ -1242,9 +1349,21 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
           }
         }();
 
-        // Support cross axis alignment on boxed with auto size
 
-        if (!hasSize) {
+        // The additional logic solves a Hot Reload bug when resetting flexSize of the parentData in
+        // the updateRenderObject method
+        final hasToReComputeItemAlignment = (
+          !hasSize
+          || (
+            child is StyledRenderBox && (
+              (child.style.flexGrow > 0 && (child.styledParentData?.verticalFlexSize == null || child.styledParentData?.horizontalFlexSize == null))
+            )
+          )
+        );
+
+        // Support cross axis alignment on boxes with auto size
+
+        if (hasToReComputeItemAlignment) {
           switch (itemAlignment) {
 
             case ItemAlignment.FLEX_START:
@@ -1287,10 +1406,18 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
         }
       }
 
-      totalDx -= columnGap;
-      totalDy -= rowGap;
+      totalDx -= horizontalGap;
+      totalDy -= verticalGap;
 
-      if (totalFlexGrow == 0) {
+      final canJustifyContent = (
+        totalFlexGrow == 0
+        && (
+          (FlexDirection.isVertical(this.style.flexDirection) && boxModel.contentBox.height > 0)
+          || (FlexDirection.isHorizontal(this.style.flexDirection) && boxModel.contentBox.width > 0)
+        )
+      );
+
+      if (canJustifyContent) {
         switch (this.style.justifyContent) {
 
           case ContentAlignment.FLEX_START:
@@ -1408,7 +1535,7 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
                 break;
               }
 
-              final translationValue = (boxModel.contentBox.height - (contentHeight - (rowGap * (this.childCount - 1)))) / (this.childCount - 1);
+              final translationValue = (boxModel.contentBox.height - (contentHeight - (verticalGap * (this.childCount - 1)))) / (this.childCount - 1);
 
               if (translationValue <= 0) {
                 break;
@@ -1429,7 +1556,7 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
                 break;
               }
 
-              final translationValue = (boxModel.contentBox.width - (contentWidth - (columnGap * (this.childCount - 1)))) / (this.childCount - 1);
+              final translationValue = (boxModel.contentBox.width - (contentWidth - (horizontalGap * (this.childCount - 1)))) / (this.childCount - 1);
 
               if (translationValue <= 0) {
                 break;
@@ -1458,7 +1585,7 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
               }
 
               final translationValue = (
-                (boxModel.contentBox.height - (contentHeight - (rowGap * (this.childCount - 1)))) / this.childCount
+                (boxModel.contentBox.height - (contentHeight - (verticalGap * (this.childCount - 1)))) / this.childCount
               ) / 2;
 
               if (translationValue <= 0) {
@@ -1473,11 +1600,11 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
                 currentTranslationOffset += translationValue;
 
                 if (index == 0) {
-                  currentTranslationOffset -= rowGap * (this.childCount - 1) / 2;
+                  currentTranslationOffset -= verticalGap * (this.childCount - 1) / 2;
                 }
 
                 if (index > 0) {
-                  currentTranslationOffset += childParentData.previousSibling!.size.height + translationValue + rowGap;
+                  currentTranslationOffset += childParentData.previousSibling!.size.height + translationValue + verticalGap;
                 }
 
                 childParentData.offset = Offset(childParentData.offset.dx, currentTranslationOffset);
@@ -1489,7 +1616,7 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
               }
 
               final translationValue = (
-                (boxModel.contentBox.width - (contentWidth - (columnGap * (this.childCount - 1)))) / this.childCount
+                (boxModel.contentBox.width - (contentWidth - (horizontalGap * (this.childCount - 1)))) / this.childCount
               ) / 2;
 
               if (translationValue <= 0) {
@@ -1504,11 +1631,11 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
                 currentTranslationOffset += translationValue;
 
                 if (index == 0) {
-                  currentTranslationOffset -= columnGap * (this.childCount - 1) / 2;
+                  currentTranslationOffset -= horizontalGap * (this.childCount - 1) / 2;
                 }
 
                 if (index > 0) {
-                  currentTranslationOffset += childParentData.previousSibling!.size.width + translationValue + columnGap;
+                  currentTranslationOffset += childParentData.previousSibling!.size.width + translationValue + horizontalGap;
                 }
 
                 childParentData.offset = Offset(currentTranslationOffset, childParentData.offset.dy);
@@ -1527,7 +1654,7 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
               }
 
               final translationValue = (
-                (boxModel.contentBox.height - (contentHeight - (rowGap * (this.childCount - 1)))) / (this.childCount + 1)
+                (boxModel.contentBox.height - (contentHeight - (verticalGap * (this.childCount - 1)))) / (this.childCount + 1)
               );
 
               if (translationValue <= 0) {
@@ -1542,11 +1669,11 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
                 currentTranslationOffset += translationValue;
 
                 if (index == 0) {
-                  currentTranslationOffset -= rowGap * (this.childCount - 1) / 2;
+                  currentTranslationOffset -= verticalGap * (this.childCount - 1) / 2;
                 }
 
                 if (index > 0) {
-                  currentTranslationOffset += childParentData.previousSibling!.size.height + rowGap;
+                  currentTranslationOffset += childParentData.previousSibling!.size.height + verticalGap;
                 }
 
                 childParentData.offset = Offset(childParentData.offset.dx, currentTranslationOffset);
@@ -1558,7 +1685,7 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
               }
 
               final translationValue = (
-                (boxModel.contentBox.width - (contentWidth - (columnGap * (this.childCount - 1)))) / (this.childCount + 1)
+                (boxModel.contentBox.width - (contentWidth - (horizontalGap * (this.childCount - 1)))) / (this.childCount + 1)
               );
 
               if (translationValue <= 0) {
@@ -1573,11 +1700,11 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
                 currentTranslationOffset += translationValue;
 
                 if (index == 0) {
-                  currentTranslationOffset -= columnGap * (this.childCount - 1) / 2;
+                  currentTranslationOffset -= horizontalGap * (this.childCount - 1) / 2;
                 }
 
                 if (index > 0) {
-                  currentTranslationOffset += childParentData.previousSibling!.size.width + columnGap;
+                  currentTranslationOffset += childParentData.previousSibling!.size.width + horizontalGap;
                 }
 
                 childParentData.offset = Offset(currentTranslationOffset, childParentData.offset.dy);
