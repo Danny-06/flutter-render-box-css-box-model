@@ -333,6 +333,16 @@ class GapUtils {
     return GapUnit.horizontal(unit);
   }
 
+  GapUnit only({
+    Unit horizontal = Unit.zero,
+    Unit vertical = Unit.zero,
+  }) {
+    return GapUnit(
+      horizontal: horizontal,
+      vertical: vertical,
+    );
+  }
+
 }
 
 class OverflowUtils {
@@ -366,7 +376,6 @@ class BoxShadowUtils {
   }
 
 }
-
 
 class Style {
 
