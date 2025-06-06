@@ -13,63 +13,81 @@ enum BoxSizing {
 class BoxModel {
 
   BoxModel({
+    this.name,
+    this.isDry = false,
     this.boxSizing = BoxSizing.BORDER_BOX,
+    this.aspectRatio,
     this.width,
     this.height,
     this.minWidth = 0.0,
     this.maxWidth = double.infinity,
     this.minHeight = 0.0,
     this.maxHeight = double.infinity,
-    this.contentWidth,
-    this.contentHeight,
+    this.contentSize = Size.zero,
     this.margin = const EdgeInsets.all(0),
     this.borderBox = BorderEdgeInsets.none,
     this.paddingBox = const EdgeInsets.all(0),
-    this.direction,
+    this.direction = Axis.vertical,
     this.horizontalFlexSize,
     this.verticalFlexSize,
+    this.shrink = false,
     this.borderRadius = BorderRadius.zero,
   }) {
+    this._init();
+  }
+
+  void _init() {
     final width = this.width;
     final height = this.height;
-    final contentWidth = this.contentWidth;
-    final contentHeight = this.contentHeight;
 
-    if (width == null && contentWidth == null && this.horizontalFlexSize == null) {
-      throw Exception('Both width and contentWidth cannot be null');
-    }
+    // if (width != null) {
+    //   if (!width.isFinite || width < 0) {
+    //     throw Exception('width must be a positive, finite number');
+    //   }
+    // }
 
-    if (height == null && contentHeight == null && this.verticalFlexSize == null) {
-      throw Exception('Both height and contentHeight cannot be null');
-    }
+    // if (height != null) {
+    //   if (!height.isFinite || height < 0) {
+    //     throw Exception('height must be a positive, finite number');
+    //   }
+    // }
 
-    if (this.boxSizing == BoxSizing.CONTENT_BOX) {
-      this.contentBox = Size(
-        (width ?? contentWidth!).clamp(this.minWidth, this.maxWidth),
-        (height ?? contentHeight!).clamp(this.minHeight, this.maxHeight),
-      );
+    switch (this.boxSizing) {
 
-      this.borderBoxSize = Size(
-        this.contentBox.width + this.paddingBox.horizontal + this.borderBox.horizontal,
-        this.contentBox.height + this.paddingBox.vertical + this.borderBox.vertical,
-      );
-    }
-    else {
-      this.borderBoxSize = Size(
-        (width ?? (contentWidth! + this.paddingBox.horizontal + this.borderBox.horizontal)).clamp(this.minWidth, this.maxWidth),
-        (height ?? (contentHeight! + this.paddingBox.vertical + this.borderBox.vertical)).clamp(this.minHeight, this.maxHeight),
-      );
+      case BoxSizing.CONTENT_BOX:
+        this.contentBox = Size(
+          (width ?? this.contentSize.width).clamp(this.minWidth, this.maxWidth),
+          (height ?? this.contentSize.height).clamp(this.minHeight, this.maxHeight),
+        );
 
-      this.contentBox = Size(
-        this.borderBoxSize.width - this.borderBox.horizontal - this.paddingBox.horizontal,
-        this.borderBoxSize.height - this.borderBox.vertical - this.paddingBox.vertical,
-      );
+        this.borderBoxSize = Size(
+          this.contentBox.width + this.paddingBox.horizontal + this.borderBox.horizontal,
+          this.contentBox.height + this.paddingBox.vertical + this.borderBox.vertical,
+        );
+      break;
+
+      case BoxSizing.BORDER_BOX:
+        this.borderBoxSize = Size(
+          (width ?? (this.contentSize.width + this.paddingBox.horizontal + this.borderBox.horizontal)).clamp(this.minWidth, this.maxWidth),
+          (height ?? (this.contentSize.height + this.paddingBox.vertical + this.borderBox.vertical)).clamp(this.minHeight, this.maxHeight),
+        );
+
+        this.contentBox = Size(
+          Math.max(0, this.borderBoxSize.width - this.borderBox.horizontal - this.paddingBox.horizontal),
+          Math.max(0, this.borderBoxSize.height - this.borderBox.vertical - this.paddingBox.vertical),
+        );
+      break;
+
+      // ignore: unreachable_switch_default
+      default:
+        throw Exception('Cannot handle BoxSizing value: ${this.boxSizing}');
+
     }
 
     if (this.direction == Axis.vertical) {
       if (this.horizontalFlexSize != null && this.width == null) {
         this.borderBoxSize = Size(
-          Math.max(this.contentWidth ?? 0, this.horizontalFlexSize! - this.margin.horizontal),
+          Math.max(this.contentSize.width, this.horizontalFlexSize! - this.margin.horizontal),
           this.borderBoxSize.height,
         );
 
@@ -82,7 +100,7 @@ class BoxModel {
       if (this.verticalFlexSize != null) {
         this.borderBoxSize = Size(
           this.borderBoxSize.width,
-          Math.max(this.contentHeight ?? 0, this.verticalFlexSize! - this.margin.vertical),
+          Math.max(this.contentSize.height, this.verticalFlexSize! - this.margin.vertical),
         );
 
         this.contentBox = Size(
@@ -96,7 +114,7 @@ class BoxModel {
       if (this.verticalFlexSize != null && this.height == null) {
         this.borderBoxSize = Size(
           this.borderBoxSize.width,
-          this.verticalFlexSize! - this.margin.vertical,
+          Math.max(this.contentSize.height, this.verticalFlexSize! - this.margin.vertical),
         );
 
         this.contentBox = Size(
@@ -107,7 +125,7 @@ class BoxModel {
 
       if (this.horizontalFlexSize != null) {
         this.borderBoxSize = Size(
-          this.horizontalFlexSize! - this.margin.horizontal,
+          Math.max(this.contentSize.width, this.horizontalFlexSize! - this.margin.horizontal),
           this.borderBoxSize.height,
         );
 
@@ -147,6 +165,10 @@ class BoxModel {
     );
   }
 
+  final String? name;
+
+  final bool isDry;
+
   final BoxSizing boxSizing;
 
   final BorderRadius borderRadius;
@@ -165,11 +187,15 @@ class BoxModel {
 
   late final Size paddingBoxSize;
 
-  final Axis? direction;
+  final Axis direction;
 
   final double? horizontalFlexSize;
 
   final double? verticalFlexSize;
+
+  final bool? shrink;
+
+  final double? aspectRatio;
 
   /// Null means auto sized
   /// Use [double.nan] to explicitly pass null in [BoxModel.copyWith]
@@ -187,9 +213,7 @@ class BoxModel {
 
   final double maxHeight;
 
-  final double? contentWidth;
-
-  final double? contentHeight;
+  final Size contentSize;
 
   final EdgeInsets margin;
 
@@ -201,33 +225,34 @@ class BoxModel {
 
   late final Offset center;
 
-  BoxConstraints getChildConstraints({
-    double parentMaxWidth = double.infinity,
-    double parentMaxHeight = double.infinity,
-  }) {
+  BoxConstraints getChildConstraints() {
     var maxWidth = 0.0;
     var maxHeight = 0.0;
 
     if (this.maxWidth.isFinite) {
-      maxWidth = this.maxWidth;
+      maxWidth = this.boxSizing == BoxSizing.CONTENT_BOX ? this.maxWidth : this.maxWidth - this.borderBox.horizontal - this.paddingBox.horizontal;
     }
     else
-    if (this.width != null) {
+    if (this.width != null || (this.direction == Axis.horizontal && this.shrink == true)) {
       maxWidth = this.contentBox.width;
     }
+    else
+    if (this.direction == Axis.horizontal && this.horizontalFlexSize != null) {
+      maxWidth = this.horizontalFlexSize! - this.margin.horizontal;
+    }
     else {
-      maxWidth = parentMaxWidth;
+      maxWidth = double.infinity;
     }
 
     if (this.maxHeight.isFinite) {
-      maxHeight = this.maxHeight;
+      maxHeight = this.boxSizing == BoxSizing.CONTENT_BOX ? this.maxHeight : this.maxHeight - this.borderBox.vertical - this.paddingBox.vertical;
     }
     else
-    if (this.height != null) {
+    if (this.height != null || (this.direction == Axis.vertical && this.shrink == true)) {
       maxHeight = this.contentBox.height;
     }
     else {
-      maxHeight = parentMaxHeight;
+      maxHeight = double.infinity;
     }
 
     return BoxConstraints(
@@ -262,41 +287,49 @@ class BoxModel {
     return paddingRRect;
   }
   
-  // fully implement copyWith
   BoxModel copyWith({
+    String? name,
+    bool? isDry,
     BoxSizing? boxSizing,
+    double? aspectRatio,
+    Axis? direction,
+    double? horizontalFlexSize,
+    double? verticalFlexSize,
+    bool? shrink,
     double? width,
     double? height,
     double? minWidth,
     double? maxWidth,
     double? minHeight,
     double? maxHeight,
-    double? contentWidth,
-    double? contentHeight,
+    Size? contentSize,
     EdgeInsets? margin,
     BorderEdgeInsets? borderBox,
     EdgeInsets? paddingBox,
-    Axis? direction,
-    double? horizontalFlexSize,
-    double? verticalFlexSize,
     BorderRadius? borderRadius,
   }) {
     return BoxModel(
+      name: name ?? this.name,
+      isDry: isDry ?? this.isDry,
       boxSizing: boxSizing ?? this.boxSizing,
-      width: (width?.isNaN == true) ? null : this.width,
-      height: (height?.isNaN == true) ? null : this.height,
+      aspectRatio: aspectRatio ?? this.aspectRatio,
+
+      direction: direction ?? this.direction,
+      horizontalFlexSize: horizontalFlexSize ?? this.horizontalFlexSize,
+      verticalFlexSize: verticalFlexSize ?? this.verticalFlexSize,
+      shrink: shrink ?? this.shrink,
+
+      width: (width?.isNaN == true) ? null : width ?? this.width,
+      height: (height?.isNaN == true) ? null : height ?? this.height,
       minWidth: minWidth ?? this.minWidth,
       maxWidth: maxWidth ?? this.maxWidth,
       minHeight: minHeight ?? this.minHeight,
       maxHeight: maxHeight ?? this.maxHeight,
-      contentWidth: contentWidth ?? this.contentWidth,
-      contentHeight: contentHeight ?? this.contentHeight,
+      contentSize: contentSize ?? this.contentSize,
+
       margin: margin ?? this.margin,
       borderBox: borderBox ?? this.borderBox,
       paddingBox: paddingBox ?? this.paddingBox,
-      direction: direction ?? this.direction,
-      horizontalFlexSize: horizontalFlexSize ?? this.horizontalFlexSize,
-      verticalFlexSize: verticalFlexSize ?? this.verticalFlexSize,
       borderRadius: borderRadius ?? this.borderRadius,
     );
   }

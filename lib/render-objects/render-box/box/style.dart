@@ -23,6 +23,8 @@ class StyledBoxUtils {
 
   final itemAlignment = ItemAlignmentUtils();
 
+  final gap = GapUtils();
+
   final overflow = OverflowUtils();
 
   final boxShadow = BoxShadowUtils();
@@ -219,6 +221,34 @@ class BorderRadiusUtils {
     );
   }
 
+  BorderRadiusUnit top(Unit value) {
+    return this.only(
+      topLeft: value,
+      topRight: value,
+    );
+  }
+
+  BorderRadiusUnit left(Unit value) {
+    return this.only(
+      topLeft: value,
+      bottomLeft: value,
+    );
+  }
+
+  BorderRadiusUnit bottom(Unit value) {
+    return this.only(
+      bottomLeft: value,
+      bottomRight: value,
+    );
+  }
+
+  BorderRadiusUnit right(Unit value) {
+    return this.only(
+      topRight: value,
+      bottomRight: value,
+    );
+  }
+
 }
 
 class FlexDirectionUtils {
@@ -289,6 +319,22 @@ class ItemAlignmentUtils {
 
 }
 
+class GapUtils {
+
+  GapUnit call(Unit unit) {
+    return GapUnit.all(unit);
+  }
+
+  GapUnit vertical(Unit unit) {
+    return GapUnit.vertical(unit);
+  }
+
+  GapUnit horizontal(Unit unit) {
+    return GapUnit.horizontal(unit);
+  }
+
+}
+
 class OverflowUtils {
 
   Overflow get visible {
@@ -305,8 +351,8 @@ class BoxShadowUtils {
 
   call({
     Offset offset = Offset.zero,
-    Color color = Colors.black,
-    BlurStyle blurStyle = BlurStyle.outer,
+    Color color = Colors.grey,
+    BlurStyle blurStyle = BlurStyle.normal,
     double blurRadius = 0.0,
     double spreadRadius = 0.0,
   }) {
@@ -355,8 +401,7 @@ class Style {
     this.alignContent = ContentAlignment.FLEX_START,
     this.alignItems = ItemAlignment.FLEX_START,
     this.flexWrap = FlexWrap.NOWRAP,
-    this.verticalGap = Unit.zero,
-    this.horizontalGap = Unit.zero,
+    this.gap = const GapUnit(),
   });
 
   final String? name;
@@ -419,9 +464,7 @@ class Style {
 
   final FlexWrap flexWrap;
 
-  final Unit verticalGap;
-
-  final Unit horizontalGap;
+  final GapUnit gap;
 
   Style copyWith({
     String? name,
@@ -432,6 +475,8 @@ class Style {
     BorderEdgeInsetsUnit? border,
     BorderRadiusUnit? borderRadius,
     EdgeInsetsUnit? padding,
+    BorderEdgeInsetsUnit? outline,
+    double? aspectRatio,
     Unit? width,
     Unit? minWidth,
     Unit? maxWidth,
@@ -442,6 +487,7 @@ class Style {
     Color? color,
     Overflow? overflow,
     double? opacity,
+    BoxShadowStyle? boxShadow,
     double? flexGrow,
     double? flexShrink,
     FlexDirection? flexDirection,
@@ -450,8 +496,7 @@ class Style {
     ItemAlignment? alignItems,
     ItemAlignment? alignSelf,
     FlexWrap? flexWrap,
-    Unit? verticalGap,
-    Unit? horizontalGap,
+    GapUnit? gap,
   }) {
     return Style(
       name: name ?? this.name,
@@ -462,6 +507,8 @@ class Style {
       border: border ?? this.border,
       borderRadius: borderRadius ?? this.borderRadius,
       padding: padding ?? this.padding,
+      outline: outline ?? this.outline,
+      aspectRatio: aspectRatio ?? this.aspectRatio,
       width: width ?? this.width,
       minWidth: minWidth ?? this.minWidth,
       maxWidth: maxWidth ?? this.maxWidth,
@@ -472,6 +519,7 @@ class Style {
       color: color ?? this.color,
       overflow: overflow ?? this.overflow,
       opacity: opacity ?? this.opacity,
+      boxShadow: boxShadow ?? this.boxShadow,
       flexGrow: flexGrow ?? this.flexGrow,
       flexShrink: flexShrink ?? this.flexShrink,
       flexDirection: flexDirection ?? this.flexDirection,
@@ -480,8 +528,42 @@ class Style {
       alignItems: alignItems ?? this.alignItems,
       alignSelf: alignSelf ?? this.alignSelf,
       flexWrap: flexWrap ?? this.flexWrap,
-      verticalGap: verticalGap ?? this.verticalGap,
-      horizontalGap: horizontalGap ?? this.horizontalGap,
+      gap: gap ?? this.gap,
+    );
+  }
+
+  Style merge(Style other) {
+    return Style(
+      name: other.name ?? this.name,
+      expandChildHorizontal: other.expandChildHorizontal,
+      expandChildVertical: other.expandChildVertical,
+      boxSizing: other.boxSizing,
+      margin: other.margin ?? this.margin,
+      border: other.border ?? this.border,
+      borderRadius: other.borderRadius,
+      padding: other.padding ?? this.padding,
+      outline: other.outline ?? this.outline,
+      aspectRatio: other.aspectRatio ?? this.aspectRatio,
+      width: other.width,
+      minWidth: other.minWidth ?? this.minWidth,
+      maxWidth: other.maxWidth ?? this.maxWidth,
+      height: other.height,
+      minHeight: other.minHeight ?? this.minHeight,
+      maxHeight: other.maxHeight ?? this.maxHeight,
+      backgroundColor: other.backgroundColor ?? this.backgroundColor,
+      color: other.color ?? this.color,
+      overflow: other.overflow,
+      opacity: other.opacity,
+      boxShadow: other.boxShadow ?? this.boxShadow,
+      alignSelf: other.alignSelf ?? this.alignSelf,
+      flexGrow: other.flexGrow,
+      flexShrink: other.flexShrink,
+      flexDirection: other.flexDirection,
+      justifyContent: other.justifyContent,
+      alignContent: other.alignContent,
+      alignItems: other.alignItems,
+      flexWrap: other.flexWrap,
+      gap: other.gap,
     );
   }
 
@@ -506,6 +588,38 @@ class BoxShadowStyle {
   final double blurRadius;
 
   final double spreadRadius;
+
+}
+
+class GapUnit {
+
+  const GapUnit({
+    this.vertical = Unit.zero,
+    this.horizontal = Unit.zero,
+  });
+
+  const GapUnit.vertical(Unit unit) : this(vertical: unit);
+
+  const GapUnit.horizontal(Unit unit) : this(horizontal: unit);
+
+  const GapUnit.all(Unit unit) : this(vertical: unit, horizontal: unit);
+
+  final Unit vertical;
+
+  final Unit horizontal;
+
+}
+
+class Gap {
+
+  const Gap({
+    this.vertical = 0.0,
+    this.horizontal = 0.0,
+  });
+
+  final double vertical;
+
+  final double horizontal;
 
 }
 
