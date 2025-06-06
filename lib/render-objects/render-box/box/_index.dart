@@ -8,7 +8,6 @@ import 'dart:ui' as ui;
 import '/extensions/string.extension.dart';
 import './style.dart';
 import './box_model.dart';
-// NOTE: If parent is a scroller, the box wont update its size if the scroller size changes (not sure how to fix it)
 
 
 class Box extends MultiChildRenderObjectWidget {
@@ -1141,6 +1140,9 @@ class StyledRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
     for (final (child, _) in childrenIterable) {
       final childParentData = child.parentData as ContainerBoxParentData<RenderBox>;
+
+      // Reset child offset to 0,0 to avoid using wrong value that can appear in some weird cases
+      childParentData.offset = Offset(0, 0);
 
       if (childParentData is StyledRenderBoxParentData) {
         childParentData.direction = FlexDirection.getAxisFrom(this.style.flexDirection);
